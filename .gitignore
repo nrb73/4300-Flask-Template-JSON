@@ -3,6 +3,7 @@ env/
 Docker/__pycache__
 
 venv/
+<scooby>/
 
 *.pyc
 __pycache__/
