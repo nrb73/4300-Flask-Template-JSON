@@ -130,16 +130,14 @@ def print_artist_track_matrix(artist_to_song_dict, song_to_artist_d, song_id_to_
   row_labels = ["unknown"] * r
   for k in song_id_to_matrix_index.keys():
     row_labels[song_id_to_matrix_index[k]] = song_id_to_name[k]
-  print(row_labels)
   df = pd.DataFrame(song_by_feature_mat, columns = collumns, index = row_labels)
   # df = pd.DataFrame(song_by_feature_mat)
   print(df)
 
 curr_token = get_token()
 # token = "current token"
-artist_list = ["baalti"]
+artist_list = ["baalti", "pompie", "drake"]
 artist_to_song_dict , song_to_artist_dict, song_id_to_name = create_top_songs_matrix_by(curr_token, artist_list)
-print(song_id_to_name)
 for a in artist_list:
   print_artist_track_matrix(artist_to_song_dict, song_to_artist_dict,song_id_to_name, a)
 
