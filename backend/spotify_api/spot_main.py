@@ -5,9 +5,37 @@ from requests import post, get
 import json
 import numpy as np
 import pandas as pd
+import jsonpickle
+from json import JSONEncoder
+from pathlib import Path
 
 load_dotenv()
 
+#GLOBAL VARIABLES
+
+with open("backend/spotify_api/database_jsons/artist_set.json", "r") as openfile: 
+  artist_json_obj = json.load(openfile)
+#retrieve set of artists in the database
+
+artist_set = jsonpickle.decode(artist_json_obj)
+
+
+with open("backend/spotify_api/database_jsons/songs_set.json", "r") as openfile: 
+  song_json_obj = json.load(openfile)
+#retrieve set of artists in the database
+
+songs_set = jsonpickle.decode(song_json_obj)
+# songs_set = set()
+
+
+#retrieve dataframes
+with open("backend/spotify_api/database_jsons/artist_dataframes.json", "r") as openfile: 
+  dataframes = [pd.read_json("/Users/meer/Desktop/4300/4300-Flask-Template-JSON/backend/spotify_api/database_jsons/artist_dataframes.json")]
+
+# dataframes = []
+
+#Feature to index for song by feature matrix. Please update this as features 
+#increase. This vector contains numbers only (to be used for similarity analysis)
 feature_dict = {
   "acousticness" : 0,
   "danceability" : 1,
@@ -23,9 +51,7 @@ feature_dict = {
   "valence" : 11 
 }
 
-collumns = ["acousticness","danceability","energy","instrumentalness",
-"key","liveness","loudness","mode","speechiness","tempo","time_signature",
-"valence"]
+collumns = feature_dict.keys()
 
 client_id = os.getenv("CLIENT_ID")
 client_secret = os.getenv("CLIENT_SECRET")
@@ -124,22 +150,65 @@ def create_top_songs_matrix_by(token, artist_list):
   #send artist ids to matrix maker, returns a tuple with a artist_to_song_dict and a song to artist dictionary. The artist to song dict has a tuple for every artist. The tuple has a song by feature vector at index 0 for that artist's top 10 songs and song_id_to_matrix_index
   return  make_artist_matrix(token, artist_ids)
 
-def print_artist_track_matrix(artist_to_song_dict, song_to_artist_d, song_id_to_name, a):
+def make_artist_track_matrix(artist_to_song_dict, song_to_artist_d, song_id_to_name, a):
   song_by_feature_mat, song_id_to_matrix_index = artist_to_song_dict[a]
   r, c = song_by_feature_mat.shape
   row_labels = ["unknown"] * r
   for k in song_id_to_matrix_index.keys():
     row_labels[song_id_to_matrix_index[k]] = song_id_to_name[k]
   df = pd.DataFrame(song_by_feature_mat, columns = collumns, index = row_labels)
-  # df = pd.DataFrame(song_by_feature_mat)
-  print(df)
+  return df
 
+def update_artist_songs(res):
+  #needs to be implemented
+  artist_set.add(a)
+  for i in res.index:
+    print(i)
+    print(str(i in songs_set))
+    if i in songs_set:
+      res.drop([i])
+    else:
+      songs_set.add(i)
+  return res
+  
+
+
+
+#################################################################################################
+# Main Function here onwards:
+  
 curr_token = get_token()
 # token = "current token"
-artist_list = ["baalti", "pompie", "drake"]
+#add artists in the list below
+artist_list = ["ed sheeran","awaken the ashes"]
 artist_to_song_dict , song_to_artist_dict, song_id_to_name = create_top_songs_matrix_by(curr_token, artist_list)
+
 for a in artist_list:
-  print_artist_track_matrix(artist_to_song_dict, song_to_artist_dict,song_id_to_name, a)
+  #returns dataframe of artist a's song by feature matrix
+  res = make_artist_track_matrix(artist_to_song_dict, song_to_artist_dict,song_id_to_name, a)
+  if a in artist_set:
+     res = update_artist_songs(res)
+  else:
+    artist_set.add(a)
+  dataframes.append(res)
+  # print(res)
+
+#return set of artists in the database
+new_artist_json_obj = jsonpickle.encode(artist_set)
+with open("backend/spotify_api/database_jsons/artist_set.json", "w") as openfile:
+  json.dump(new_artist_json_obj, openfile)
+
+#return songs set to database
+new_songs_json_obj = jsonpickle.encode(songs_set)
+with open("backend/spotify_api/database_jsons/songs_set.json", "w") as openfile:
+  json.dump(new_songs_json_obj, openfile)
+
+#return list of dataframes
+p = Path("/Users/meer/Desktop/4300/4300-Flask-Template-JSON/backend/spotify_api/database_jsons/artist_dataframes.json")
+fin_dataframe = pd.concat(dataframes, join='outer', axis=0)
+print(fin_dataframe)
+fin_dataframe.to_json(path_or_buf=p)
+
 
 
 

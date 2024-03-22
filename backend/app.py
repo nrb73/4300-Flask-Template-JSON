@@ -18,8 +18,8 @@ json_file_path = os.path.join(current_directory, 'init.json')
 # Assuming your JSON data is stored in a file named 'init.json'
 with open(json_file_path, 'r') as file:
     data = json.load(file)
-    # episodes_df = pd.DataFrame(data['episodes'])
-    # reviews_df = pd.DataFrame(data['reviews'])
+    episodes_df = pd.DataFrame(data['episodes'])
+    reviews_df = pd.DataFrame(data['reviews'])
     songs_df = pd.DataFrame(data)
     print(songs_df.shape())
     
