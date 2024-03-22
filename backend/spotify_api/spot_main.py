@@ -29,10 +29,10 @@ songs_set = jsonpickle.decode(song_json_obj)
 
 
 #retrieve dataframes
-with open("backend/spotify_api/database_jsons/artist_dataframes.json", "r") as openfile: 
-  dataframes = [pd.read_json("/Users/meer/Desktop/4300/4300-Flask-Template-JSON/backend/spotify_api/database_jsons/artist_dataframes.json")]
+# with open("backend/spotify_api/database_jsons/artist_dataframes.json", "r") as openfile: 
+#   dataframes = [pd.read_json("/Users/meer/Desktop/4300/4300-Flask-Template-JSON/backend/spotify_api/database_jsons/artist_dataframes.json")]
 
-# dataframes = []
+dataframes = []
 
 #Feature to index for song by feature matrix. Please update this as features 
 #increase. This vector contains numbers only (to be used for similarity analysis)
@@ -163,8 +163,6 @@ def update_artist_songs(res):
   #needs to be implemented
   artist_set.add(a)
   for i in res.index:
-    print(i)
-    print(str(i in songs_set))
     if i in songs_set:
       res.drop([i])
     else:
@@ -180,7 +178,7 @@ def update_artist_songs(res):
 curr_token = get_token()
 # token = "current token"
 #add artists in the list below
-artist_list = ["ed sheeran","awaken the ashes"]
+artist_list = ["drake", "nicky jam", "elton john", "khalid", "shawn mendes"]
 artist_to_song_dict , song_to_artist_dict, song_id_to_name = create_top_songs_matrix_by(curr_token, artist_list)
 
 for a in artist_list:
@@ -207,7 +205,7 @@ with open("backend/spotify_api/database_jsons/songs_set.json", "w") as openfile:
 p = Path("/Users/meer/Desktop/4300/4300-Flask-Template-JSON/backend/spotify_api/database_jsons/artist_dataframes.json")
 fin_dataframe = pd.concat(dataframes, join='outer', axis=0)
 print(fin_dataframe)
-fin_dataframe.to_json(path_or_buf=p)
+fin_dataframe.to_json(path_or_buf=p, orient='split')
 
 
 
