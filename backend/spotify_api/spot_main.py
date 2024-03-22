@@ -18,6 +18,7 @@ with open("backend/spotify_api/database_jsons/artist_set.json", "r") as openfile
 #retrieve set of artists in the database
 
 artist_set = jsonpickle.decode(artist_json_obj)
+# artist_set = set()
 
 
 with open("backend/spotify_api/database_jsons/songs_set.json", "r") as openfile: 
@@ -30,7 +31,7 @@ songs_set = jsonpickle.decode(song_json_obj)
 
 #retrieve dataframes
 # with open("backend/spotify_api/database_jsons/artist_dataframes.json", "r") as openfile: 
-#   dataframes = [pd.read_json("/Users/meer/Desktop/4300/4300-Flask-Template-JSON/backend/spotify_api/database_jsons/artist_dataframes.json")]
+#   dataframes = [pd.read_json("/Users/meer/Desktop/4300/4300-Flask-Template-JSON/backend/spotify_api/database_jsons/artist_dataframes.json", orient = "split")]
 
 dataframes = []
 
@@ -108,9 +109,10 @@ def matrix_function(json):
   song_id_to_matrix_index  = {}
   song_by_feature_mat = np.zeros((len(json), 12))
   for i, song in enumerate(json):
-    song_id_to_matrix_index[song["id"]] = i
-    for f in feature_dict.keys():
-      song_by_feature_mat[i][feature_dict[f]] = song[f]
+    if song != None:
+      song_id_to_matrix_index[song["id"]] = i
+      for f in feature_dict.keys():
+        song_by_feature_mat[i][feature_dict[f]] = song[f]
   return song_by_feature_mat, song_id_to_matrix_index
 
 def make_artist_matrix(token, artist_ids, artist_to_song_dict={}):
@@ -148,7 +150,7 @@ def create_top_songs_matrix_by(token, artist_list):
   for artist in artist_list:
     artist_ids[artist] = search_artist(token, artist)
   #send artist ids to matrix maker, returns a tuple with a artist_to_song_dict and a song to artist dictionary. The artist to song dict has a tuple for every artist. The tuple has a song by feature vector at index 0 for that artist's top 10 songs and song_id_to_matrix_index
-  return  make_artist_matrix(token, artist_ids)
+  return make_artist_matrix(token, artist_ids)
 
 def make_artist_track_matrix(artist_to_song_dict, song_to_artist_d, song_id_to_name, a):
   song_by_feature_mat, song_id_to_matrix_index = artist_to_song_dict[a]
@@ -161,10 +163,9 @@ def make_artist_track_matrix(artist_to_song_dict, song_to_artist_d, song_id_to_n
 
 def update_artist_songs(res):
   #needs to be implemented
-  artist_set.add(a)
   for i in res.index:
     if i in songs_set:
-      res.drop([i])
+      res.drop(i)
     else:
       songs_set.add(i)
   return res
@@ -178,16 +179,112 @@ def update_artist_songs(res):
 curr_token = get_token()
 # token = "current token"
 #add artists in the list below
-artist_list = ["drake", "nicky jam", "elton john", "khalid", "shawn mendes"]
+artist_list = ['21 Savage',
+    'Adele',
+    'Anuel AA',
+    'Arctic Monkeys',
+    'Ariana Grande',
+    'Arijit Singh',
+    'Ayra Starr',
+    'BTS',
+    'Bad Bunny',
+    'Benson Boone',
+    'Beyoncé',
+    'Billie Eilish',
+    'Bizarrap',
+    'Bruno Mars',
+    'Burna Boy',
+    'CYRIL',
+    'Carin Leon',
+    'Chris Brown',
+    'Coldplay',
+    'Creepy Nuts',
+    'Cris Mj',
+    'Dadju',
+    'David Guetta',
+    'Diljit Dosanjh',
+    'Disturbed',
+    'Djo',
+    'Doja Cat',
+    'Drake',
+    'Dua Lipa',
+    'Ed Sheeran',
+    'Emilia',
+    'Eminem',
+    'Feid',
+    'Frank Ocean',
+    'Fuerza Regida',
+    'Future',
+    'Gazo',
+    'Grupo Frontera',
+    'Harry Styles',
+    'Hozier',
+    'JUL',
+    'Jack Harlow',
+    'Jere Klein',
+    'Jimin',
+    'Jung Kook',
+    'Junior H',
+    'Justin Bieber',
+    'Justin Timberlake',
+    'KAROL G',
+    'Kacey Musgraves',
+    'Kanye West',
+    'LE SSERAFIM',
+    'LINKIN PARK',
+    'Lady Gaga',
+    'Lana Del Rey',
+    'Luke Combs',
+    'Maluma',
+    'Manuel Turizo',
+    'Metro Boomin',
+    'Miley Cyrus',
+    'Milo j',
+    'Mora',
+    'Morgan Wallen',
+    'Mrs. Green Apple',
+    'Myke Towers',
+    'Natanael Cano',
+    'Natasha Bedingfield',
+    'Ninho',
+    'Noah Kahan',
+    'Ofenbach',
+    'Olivia Rodrigo',
+    'One Direction',
+    'Peso Pluma',
+    'Playboi Carti',
+    'Pritam',
+    'Quevedo',
+    'Rauw Alejandro',
+    'Rihanna',
+    'SZA',
+    'Shakira',
+    'Tate McRae',
+    'Tayc',
+    'Taylor Swift',
+    'Teddy Swims',
+    'The Weeknd',
+    'Tiakola',
+    'Tiésto',
+    'Tony Effe',
+    'Travis Scott',
+    'Ty Dolla $ign',
+    'Tyla',
+    'V',
+    'Werenoi',
+    'Xavi',
+    'YG Marley',
+    'YOASOBI',
+    'Zach Bryan',
+    'floyymenor',
+    '¥$' ]
 artist_to_song_dict , song_to_artist_dict, song_id_to_name = create_top_songs_matrix_by(curr_token, artist_list)
 
 for a in artist_list:
   #returns dataframe of artist a's song by feature matrix
   res = make_artist_track_matrix(artist_to_song_dict, song_to_artist_dict,song_id_to_name, a)
-  if a in artist_set:
-     res = update_artist_songs(res)
-  else:
-    artist_set.add(a)
+  update_artist_songs(res)
+  artist_set.add(a)
   dataframes.append(res)
   # print(res)
 
