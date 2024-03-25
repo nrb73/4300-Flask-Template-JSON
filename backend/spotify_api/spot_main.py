@@ -456,7 +456,7 @@ for a in artist_list:
 
 #return set of artists in the database
 new_artist_json_obj = jsonpickle.encode(artist_set)
-with open("/Users/meer/Desktop/4300/4300-Flask-Template-JSON/backend/spotify_api/database_jsons/small_artist_set.json", "w") as openfile:
+with open("/Users/meer/Desktop/4300/4300-Flask-Template-JSON/backend/spotify_api/database_jsons/small_artist_list.json", "w") as openfile:
   json.dump(new_artist_json_obj, openfile)
 
 #return songs set to database

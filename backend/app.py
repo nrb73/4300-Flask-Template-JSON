@@ -4,7 +4,6 @@ from flask import Flask, render_template, request
 from flask_cors import CORS
 from helpers.MySQLDatabaseHandler import MySQLDatabaseHandler
 import pandas as pd
-import jsonpickle
 import numpy as np
 import sys
 
@@ -26,10 +25,8 @@ big_songs_df = pd.read_json(json_file_path, orient = "split")
 small_songs_df = pd.read_json(json_file_path2, orient="split")
 small_songs_np = small_songs_df.to_numpy()
 
-with open("../backend/spotify_api/database_jsons/big_songs_set.json", "r") as openfile: 
-  big_songs_json_obj = json.load(openfile)
-#retrieve set of artists in the database
-big_songs_set = jsonpickle.decode(big_songs_json_obj)
+with open("../backend/spotify_api/database_jsons/big_songs_list.json", "r") as openfile: 
+  big_songs_set = json.load(openfile)
 
 # with open("/Users/meer/Desktop/4300/4300-Flask-Template-JSON/backend/spotify_api/database_jsons/small_songs_set.json", "r") as openfile: 
 #   small_songs_json_obj = json.load(openfile)
