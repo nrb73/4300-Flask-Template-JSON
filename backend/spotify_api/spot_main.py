@@ -35,32 +35,26 @@ songs_set = set()
 
 
 #retrieve dataframes
-with open("backend/spotify_api/database_jsons/artist_dataframes.json", "r") as openfile: 
-  dataframes = [pd.read_json("/Users/meer/Desktop/4300/4300-Flask-Template-JSON/backend/spotify_api/database_jsons/artist_dataframes.json", orient = "split")]
+# with open("backend/spotify_api/database_jsons/artist_dataframes.json", "r") as openfile: 
+#   dataframes = [pd.read_json("/Users/meer/Desktop/4300/4300-Flask-Template-JSON/backend/spotify_api/database_jsons/artist_dataframes.json", orient = "split")]
 
-# dataframes = []
+dataframes = []
 
 #Feature to index for song by feature matrix. Please update this as features 
 #increase. This vector contains numbers only (to be used for similarity analysis)
 feature_dict = {
-  "artist" : 1,
-  "explicit" : 2,
-  "id" : 3,
-  "popularity" : 4,
-  "title" : 5,
-  "energy" : 6,
-  "liveness" : 7,
-  "tempo" : 8,
-  "speechiness" : 9,
-  "acousticness" : 10,
-  "instrumentalness" : 11,
-  "time_signature" : 12,
-  "danceability" : 13,
-  "key" : 14,
-  "duration_ms" : 15, 
-  "loudness" : 16,
-  "valence" : 17,
-  "mode" : 18
+  "acousticness" : 0,
+  "danceability" : 1,
+  "energy" : 2,
+  "instrumentalness" : 3,
+  "key" : 4,
+  "liveness" : 5,
+  "loudness" : 6,
+  "mode" : 7,
+  "speechiness" : 8,
+  "tempo" : 9,
+  "time_signature" : 10,
+  "valence" : 11 
 }
 
 collumns = feature_dict.keys()
@@ -195,6 +189,13 @@ def get_lyrics(token, song):
   result_2 = get(url, headers=headers)
   # json_result_2 = json.loads(result.content)
   print(result_2)
+
+# def dataframe_creation(token, artist_to_song_dict, song_id_to_name, a):
+#   song_by_feature_mat, song_id_to_matrix_index = artist_to_song_dict[a]
+
+  
+
+#   return None
   
 
 
@@ -204,17 +205,59 @@ def get_lyrics(token, song):
   
 curr_token = get_token()
 
-artist_list = ['drake']
+artist_list = ["Rihanna", "Morgan Wallen", "Manuel Turizo", "JUL", "Gazo", "Feid", "Adele", "Lana Del Rey", "Tony Effe", "Lady Gaga", "Tiakola", "Junior H", "Creepy Nuts", "Bruno Mars", "Tate McRae", "Natasha Bedingfield", "Bizarrap", "Fuerza Regida", "Benson Boone", "Travis Scott", "Chris Brown", "Shakira", "The Weeknd", "Tiu00e9sto", "Peso Pluma", "Teddy Swims", "Arijit Singh", "Tyla", "Quevedo", "Diljit Dosanjh", "Jimin", "u00a5$", "SZA", "CYRIL", "Emilia", "LINKIN PARK", "floyymenor", "Mora", "Noah Kahan", "Xavi", "Ty Dolla $ign", "Zach Bryan", "Hozier", "Pritam", "Taylor Swift", "Justin Bieber", "Future", "Miley Cyrus", "21 Savage", "Burna Boy", "Luke Combs", "BTS", "Kanye West", "Tayc", "KAROL G", "Rauw Alejandro", "Frank Ocean", "Dadju", "Metro Boomin", "V", "Beyoncu00e9", "Coldplay", "Kacey Musgraves", "Doja Cat", "Eminem", "Werenoi", "Disturbed", "Bad Bunny", "Dua Lipa", "Olivia Rodrigo", "Natanael Cano", "Ariana Grande", "Anuel AA", "YOASOBI", "Mrs. Green Apple", "LE SSERAFIM", "Maluma", "YG Marley", "Billie Eilish", "Justin Timberlake", "Myke Towers", "Ed Sheeran", "David Guetta", "Cris Mj", "Jung Kook", "Jack Harlow", "Ayra Starr", "Ninho", "Drake", "Jere Klein", "Carin Leon", "Arctic Monkeys", "Djo", "One Direction", "Grupo Frontera", "Ofenbach", "Harry Styles", "Milo j", "Playboi Carti"]
 
-print(dataframes)
+artist_to_song_dict , song_to_artist_dict, song_id_to_name = create_top_songs_matrix_by(curr_token, artist_list)
+
+for a in artist_list:
+  #returns dataframe of artist a's song by feature matrix
+  res = make_artist_track_matrix(artist_to_song_dict, song_to_artist_dict,song_id_to_name, a)
+  # update_artist_songs(res)
+  # artist_set.add(a)
+  dataframes.append(res)
+  # print(res)
+
+fin_dataframe = pd.concat(dataframes, join='outer', axis=0)
+
+print(fin_dataframe)
+
+succ = 0
+f = 0
+lyrics_list = []
+for song_name, feats in fin_dataframe.iterrows():
+  try:
+    artist_name = song_to_artist_dict[song_name]
+    song_name = re.sub(r's+', '%20', song_name)
+    artist_name = re.sub(r's+', '%20', artist_name)
+    # print(song_name)
+    # print(artist_name)
+  # song_name.replace(/s+/g, '%20')
+    str_url = f"https://private-anon-c7cec5a600-lyricsovh.apiary-proxy.com/v1/{artist_name}/{song_name}"
+    result = get(str_url)
+    json_result = json.loads(result.content)["lyrics"]
+    # print(json_result)
+    # print("success")
+    succ += 1
+
+  except:
+    
+    f += 1
+    # print("get failed")
+
+print(f"total succesful: {succ}")
+print(f"total fail: {f}")
+  
+
+
+
 
 # Genius Lyrics code
-token = "piO53A6NuGW0cKJ_YPDC4UpXjO5Yc-dJaBUwSt3yzdQZGiA4TxfxAU75nQz2D_p9"
-genius_token = Genius(token)
-for artist_name in artist_list:
-  artist = genius_token.search_artist(artist_name)
-  for song in artist.songs:
-    print(song.lyrics)
+# token = "piO53A6NuGW0cKJ_YPDC4UpXjO5Yc-dJaBUwSt3yzdQZGiA4TxfxAU75nQz2D_p9"
+# genius_token = Genius(token)
+# for artist_name in artist_list:
+#   artist = genius_token.search_artist(artist_name)
+#   for song in artist.songs:
+#     print(song.lyrics)
   # artist.save_lyrics()
     
 # while True:
@@ -229,106 +272,106 @@ for artist_name in artist_list:
 
 # print(f"Current token is: {curr_token}")
 # token = "BQD4VVXcg2x59WuetMCD4obIVx0I1oRBPpNzBJeVCPydM68kDlnMziFpOasAsEp4UIgKEDnaZjq-r9sNYLGgfN9eMsXSO_EhUjV5s8TauoWFscgsDug"
-#add artists in the list below
+# add artists in the list below
 # artist_list = ['21 Savage',
-    # 'Adele',
-    # 'Anuel AA',
-    # 'Arctic Monkeys',
-    # 'Ariana Grande',
-    # 'Arijit Singh',
-    # 'Ayra Starr',
-    # 'BTS',
-    # 'Bad Bunny',
-    # 'Benson Boone',
-    # 'Beyoncé',
-    # 'Billie Eilish',
-    # 'Bizarrap',
-    # 'Bruno Mars',
-    # 'Burna Boy',
-    # 'CYRIL',
-    # 'Carin Leon',
-    # 'Chris Brown',
-    # 'Coldplay',
-    # 'Creepy Nuts',
-    # 'Cris Mj',
-    # 'Dadju',
-    # 'David Guetta',
-    # 'Diljit Dosanjh',
-    # 'Disturbed',
-    # 'Djo',
-    # 'Doja Cat',
-    # 'Drake',
-    # 'Dua Lipa',
-    # 'Ed Sheeran',
-    # 'Emilia',
-    # 'Eminem',
-    # 'Feid',
-    # 'Frank Ocean',
-    # 'Fuerza Regida',
-    # 'Future',
-    # 'Gazo',
-    # 'Grupo Frontera',
-    # 'Harry Styles',
-    # 'Hozier',
-    # 'JUL',
-    # 'Jack Harlow',
-    # 'Jere Klein',
-    # 'Jimin',
-    # 'Jung Kook',
-    # 'Junior H',
-    # 'Justin Bieber',
-    # 'Justin Timberlake',
-    # 'KAROL G',
-    # 'Kacey Musgraves',
-    # 'Kanye West',
-    # 'LE SSERAFIM',
-    # 'LINKIN PARK',
-    # 'Lady Gaga',
-    # 'Lana Del Rey',
-    # 'Luke Combs',
-    # 'Maluma',
-    # 'Manuel Turizo',
-    # 'Metro Boomin',
-    # 'Miley Cyrus',
-    # 'Milo j',
-    # 'Mora',
-    # 'Morgan Wallen',
-    # 'Mrs. Green Apple',
-    # 'Myke Towers',
-    # 'Natanael Cano',
-    # 'Natasha Bedingfield',
-    # 'Ninho',
-    # 'Noah Kahan',
-    # 'Ofenbach',
-    # 'Olivia Rodrigo',
-    # 'One Direction',
-    # 'Peso Pluma',
-    # 'Playboi Carti',
-    # 'Pritam',
-    # 'Quevedo',
-    # 'Rauw Alejandro',
-    # 'Rihanna',
-    # 'SZA',
-    # 'Shakira',
-    # 'Tate McRae',
-    # 'Tayc',
-    # 'Taylor Swift',
-    # 'Teddy Swims',
-    # 'The Weeknd',
-    # 'Tiakola',
-    # 'Tiésto',
-    # 'Tony Effe',
-    # 'Travis Scott',
-    # 'Ty Dolla $ign',
-    # 'Tyla',
-    # 'V',
-    # 'Werenoi',
-    # 'Xavi',
-    # 'YG Marley',
-    # 'YOASOBI',
-    # 'Zach Bryan',
-    # 'floyymenor',
-    # '¥$' ]
+#     'Adele',
+#     'Anuel AA',
+#     'Arctic Monkeys',
+#     'Ariana Grande',
+#     'Arijit Singh',
+#     'Ayra Starr',
+#     'BTS',
+#     'Bad Bunny',
+#     'Benson Boone',
+#     'Beyoncé',
+#     'Billie Eilish',
+#     'Bizarrap',
+#     'Bruno Mars',
+#     'Burna Boy',
+#     'CYRIL',
+#     'Carin Leon',
+#     'Chris Brown',
+#     'Coldplay',
+#     'Creepy Nuts',
+#     'Cris Mj',
+#     'Dadju',
+#     'David Guetta',
+#     'Diljit Dosanjh',
+#     'Disturbed',
+#     'Djo',
+#     'Doja Cat',
+#     'Drake',
+#     'Dua Lipa',
+#     'Ed Sheeran',
+#     'Emilia',
+#     'Eminem',
+#     'Feid',
+#     'Frank Ocean',
+#     'Fuerza Regida',
+#     'Future',
+#     'Gazo',
+#     'Grupo Frontera',
+#     'Harry Styles',
+#     'Hozier',
+#     'JUL',
+#     'Jack Harlow',
+#     'Jere Klein',
+#     'Jimin',
+#     'Jung Kook',
+#     'Junior H',
+#     'Justin Bieber',
+#     'Justin Timberlake',
+#     'KAROL G',
+#     'Kacey Musgraves',
+#     'Kanye West',
+#     'LE SSERAFIM',
+#     'LINKIN PARK',
+#     'Lady Gaga',
+#     'Lana Del Rey',
+#     'Luke Combs',
+#     'Maluma',
+#     'Manuel Turizo',
+#     'Metro Boomin',
+#     'Miley Cyrus',
+#     'Milo j',
+#     'Mora',
+#     'Morgan Wallen',
+#     'Mrs. Green Apple',
+#     'Myke Towers',
+#     'Natanael Cano',
+#     'Natasha Bedingfield',
+#     'Ninho',
+#     'Noah Kahan',
+#     'Ofenbach',
+#     'Olivia Rodrigo',
+#     'One Direction',
+#     'Peso Pluma',
+#     'Playboi Carti',
+#     'Pritam',
+#     'Quevedo',
+#     'Rauw Alejandro',
+#     'Rihanna',
+#     'SZA',
+#     'Shakira',
+#     'Tate McRae',
+#     'Tayc',
+#     'Taylor Swift',
+#     'Teddy Swims',
+#     'The Weeknd',
+#     'Tiakola',
+#     'Tiésto',
+#     'Tony Effe',
+#     'Travis Scott',
+#     'Ty Dolla $ign',
+#     'Tyla',
+#     'V',
+#     'Werenoi',
+#     'Xavi',
+#     'YG Marley',
+#     'YOASOBI',
+#     'Zach Bryan',
+#     'floyymenor',
+#     '¥$' ]
 # artist_list = [ "Anna B Savage",
 #     "Automatic",
 #     "Bambara",
@@ -496,15 +539,7 @@ for artist_name in artist_list:
 #     "Yves Tumor",
 #     "Zola Jesus"]
 
-# artist_to_song_dict , song_to_artist_dict, song_id_to_name = create_top_songs_matrix_by(curr_token, artist_list)
 
-# for a in artist_list:
-#   #returns dataframe of artist a's song by feature matrix
-#   res = make_artist_track_matrix(artist_to_song_dict, song_to_artist_dict,song_id_to_name, a)
-#   update_artist_songs(res)
-#   artist_set.add(a)
-#   dataframes.append(res)
-#   print(res)
 
 # song_list = ["Happier"]
 # for s in song_list:

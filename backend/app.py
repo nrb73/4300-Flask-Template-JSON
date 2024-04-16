@@ -6,6 +6,10 @@ from helpers.MySQLDatabaseHandler import MySQLDatabaseHandler
 import pandas as pd
 import numpy as np
 import sys
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MultiLabelBinarizer
 
 # ROOT_PATH for linking with all your files. 
 # Feel free to use a config.py or settings.py with a global export variable
@@ -16,24 +20,40 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Specify the path to the JSON file relative to the current script
 
-json_file_path = "../backend/spotify_api/database_jsons/big_artist_dataframes.json"
+# json_file_path = "../backend/spotify_api/database_jsons/big_artist_dataframes.json"
 json_file_path2 = "../backend/spotify_api/database_jsons/small_artist_dataframes.json"
 
-# Assuming your JSON data is stored in a file named 'init.json'
-big_songs_df = pd.read_json(json_file_path, orient = "split")
+# # Assuming your JSON data is stored in a file named 'init.json'
+# big_songs_df = pd.read_json(json_file_path, orient = "split")
 
 small_songs_df = pd.read_json(json_file_path2, orient="split")
-small_songs_np = small_songs_df.to_numpy()
+# small_songs_np = small_songs_df.to_numpy()
 
-with open("../backend/spotify_api/database_jsons/big_songs_list.json", "r") as openfile: 
-  big_songs_set = json.load(openfile)
+# with open("../backend/spotify_api/database_jsons/big_songs_list.json", "r") as openfile: 
+#   big_songs_set = json.load(openfile)
 
-# with open("/Users/meer/Desktop/4300/4300-Flask-Template-JSON/backend/spotify_api/database_jsons/small_songs_set.json", "r") as openfile: 
-#   small_songs_json_obj = json.load(openfile)
+with open("/Users/meer/Desktop/4300/4300-Flask-Template-JSON/backend/spotify_api/database_jsons/small_songs_set.json", "r") as openfile: 
+  small_songs_json_obj = json.load(openfile)
 #retrieve set of artists in the database
 small_songs_list = small_songs_df.index.tolist()
 
-debug = True
+artist_df = pd.read_csv('../backend/kaggle_data/new_data.csv')
+
+artist_df = artist_df.dropna()
+
+
+for i, j in artist_df.iterrows():
+    print("index:")
+    print(i)
+    print("row:")
+    print(j.dtype)
+
+lst = artist_df.loc[:, "artist"]
+artist_set = []
+for i in lst:
+  artist_set.append(str(i))
+
+debug = False
 
 np.set_printoptions(threshold=sys.maxsize)
 
@@ -56,6 +76,63 @@ feature_dict = {
   "time_signature" : 10,
   "valence" : 11 
 }
+
+def lyric_vectorization (artist_df, query_artist):
+    tfidf_vectorizer = TfidfVectorizer(max_features=10000, stop_words='english', ngram_range=(1,2))
+    tfidf_matrix = tfidf_vectorizer.fit_transform(artist_df['concatenated_lyrics'])
+
+    # finding cosine similarity
+    cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+    cosine_sim_df = pd.DataFrame(cosine_sim, index=artist_df['artist'], columns=artist_df['artist'])
+
+    # get similarity scores for Eminem
+    similar_artists = cosine_sim_df[f'{query_artist}'].sort_values(ascending=False)
+    return (similar_artists[1:], tfidf_matrix)
+
+def song_name_vectorization (artist_df, query_artist):
+    # FINDING ARTIST SIMILARITY USING ONLY SONG TITLES
+    print("start func snv")
+    #finding tfidf scores
+    tfidf_vectorizer_title = TfidfVectorizer(max_features=10000, stop_words='english', ngram_range=(1,2))
+    # print(artist_df['song_titles'].index(np.nan))
+    print(artist_df['song_titles'])
+    tfidf_matrix_title = tfidf_vectorizer_title.fit_transform(artist_df['song_titles'])
+
+    #finding cosine similarity
+    cosine_sim_title = cosine_similarity(tfidf_matrix_title, tfidf_matrix_title)
+    cosine_sim_df_title = pd.DataFrame(cosine_sim_title, index=artist_df['artist'], columns=artist_df['artist'])
+
+    # get similarity scores for Eminem
+    similar_artists_title = cosine_sim_df_title[f'{query_artist}'].sort_values(ascending=False)
+    print("end snv")
+    return (similar_artists_title[1:], tfidf_matrix_title)
+
+def composite_vector (artist_df, tfidf_matrix, tfidf_matrix_title):
+    scaler = MinMaxScaler()
+    view_counts_normalized = scaler.fit_transform(artist_df[['average_views']])
+    tag_binarizer = MultiLabelBinarizer()
+    tags_transformed = tag_binarizer.fit_transform(artist_df['tags'])
+
+    # defining weights for features
+    weight_titles = 0.3 #since song titles did not give accurate results, weighted less
+    weight_lyrics = 1.5 #weighted more since it was more accurate
+    weight_views = 1.0 
+    weight_tags = 1.0
+
+    # applying weights to features
+    weighted_titles = tfidf_matrix_title.toarray() * weight_titles
+    weighted_lyrics = tfidf_matrix.toarray() * weight_lyrics
+    weighted_views = view_counts_normalized * weight_views
+    weighted_tags = tags_transformed * weight_tags
+
+    features_combined_weighted = np.hstack((weighted_titles, weighted_lyrics, weighted_views, weighted_tags))
+
+    #COSINE SIMILARITY FOR COMPOSITE VECTOR
+
+    cosine_sim_weighted = cosine_similarity(features_combined_weighted, features_combined_weighted)
+    cosine_sim_df_weighted = pd.DataFrame(cosine_sim_weighted, index=artist_df['artist'], columns=artist_df['artist'])
+
+    return cosine_sim_df_weighted
 
 # Normalizes certain features in features_vec
 def normalize_feature_vec(features_vec):
@@ -80,29 +157,40 @@ def normalize_feature_mat(features_mat):
 
 # Sample search using json with pandas
 def json_search(query):
-    if query in big_songs_set:
-        song_ft = big_songs_df.loc[query]
-        song_vect = song_ft.to_numpy()
-        if song_vect.ndim > 1:
-            song_vect = song_vect[0]
-        print("song vector")
-        print(song_vect)
-        norm_song_vect = normalize_feature_vec(song_vect)
-        norm_small_songs = normalize_feature_mat(small_songs_np)
-        similarity_index = np.dot(norm_song_vect, norm_small_songs.T) / (np.linalg.norm(norm_song_vect) * np.linalg.norm(norm_small_songs))
-        rankings = np.argsort(similarity_index)[::-1]
+
+    if query in artist_set:
+        print(query)
+        _, tfidf_matrix = lyric_vectorization(artist_df, query)
+        _, tfidf_matrix_title = song_name_vectorization(artist_df, query)
+        cosine_sim_df_weighted = composite_vector (artist_df, tfidf_matrix, tfidf_matrix_title)
+        similar_artists_composite = cosine_sim_df_weighted[f'{str(query)}'].sort_values(ascending=False)
+        # print(similar_artists_composite[1:])  # start from index 1 to skip artist himself       
+        rankings = similar_artists_composite[1:]
+    # if query in big_songs_set:
+    #     song_ft = big_songs_df.loc[query]
+    #     song_vect = song_ft.to_numpy()
+    #     if song_vect.ndim > 1:
+    #         song_vect = song_vect[0]
+    #     print("song vector")
+    #     print(song_vect)
+    #     norm_song_vect = normalize_feature_vec(song_vect)
+    #     norm_small_songs = normalize_feature_mat(small_songs_np)
+    #     similarity_index = np.dot(norm_song_vect, norm_small_songs.T) / (np.linalg.norm(norm_song_vect) * np.linalg.norm(norm_small_songs))
+        # rankings = np.argsort(similarity_index)[::-1]
         # print("similarity index")
         # print(np.shape(similarity_index))
         # print(similarity_index)
         print("rankings indicies:")
         print(rankings)
         res = []
-        for r in rankings[:10]:
-            res.append(small_songs_list[r])
-        print(res)
+        ranks = []
+        for r in rankings.keys()[:10]:
+            res.append(r)
+            ranks.append(rankings[r])
         return json.dumps(res)
+        # rankings.to_json
     else: 
-        return json.dumps(small_songs_list[:10])
+        return json.dumps([])
 
 @app.route("/")
 def home():
@@ -116,6 +204,7 @@ def song_search():
 
 if 'DB_NAME' not in os.environ:
     app.run(debug=True,host="0.0.0.0",port=5000)
+
 
 # debug = True
 
