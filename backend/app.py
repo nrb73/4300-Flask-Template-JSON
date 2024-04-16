@@ -38,7 +38,7 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 # #retrieve set of artists in the database
 # small_songs_list = small_songs_df.index.tolist()
 
-artist_df = pd.read_csv(current_directory + '/backend/kaggle_data/new_data.csv')
+artist_df = pd.read_csv(current_directory + '/kaggle_data/new_data.csv')
 
 artist_df = artist_df.dropna()
 
