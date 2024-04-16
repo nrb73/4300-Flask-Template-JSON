@@ -10,6 +10,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import MultiLabelBinarizer
+import html_to_json
 
 # ROOT_PATH for linking with all your files. 
 # Feel free to use a config.py or settings.py with a global export variable
@@ -41,6 +42,17 @@ artist_df = pd.read_csv('../backend/kaggle_data/new_data.csv')
 
 artist_df = artist_df.dropna()
 
+
+
+# defining weights for features
+weight_titles = 0.3 #since song titles did not give accurate results, weighted less
+weight_lyrics = 1.5 #weighted more since it was more accurate
+weight_views = 1.0 
+weight_tags = 1.0
+
+features_combined_weighted = None
+
+query_artist = None
 
 for i, j in artist_df.iterrows():
     print("index:")
@@ -108,6 +120,7 @@ def song_name_vectorization (artist_df, query_artist):
     return (similar_artists_title[1:], tfidf_matrix_title)
 
 def composite_vector (artist_df, tfidf_matrix, tfidf_matrix_title):
+    global features_combined_weighted
     scaler = MinMaxScaler()
     view_counts_normalized = scaler.fit_transform(artist_df[['average_views']])
     tag_binarizer = MultiLabelBinarizer()
@@ -134,6 +147,49 @@ def composite_vector (artist_df, tfidf_matrix, tfidf_matrix_title):
 
     return cosine_sim_df_weighted
 
+
+def mean_vector(indices, feature_matrix):
+    return np.mean(feature_matrix[indices, :], axis=0)
+
+def update_vector(relevant_artists=[], irrelevant_artists=[]):
+    # print(artist_df['artist'])
+    # print("between")
+    # print(f'{query_artist}')
+    # print(artist_df.index[artist_df['artist'] == query_artist])
+    query_index = artist_df.index[artist_df['artist'] == query_artist].tolist()[0]
+    relevant_indices = artist_df.index[artist_df['artist'].isin(relevant_artists)].tolist()
+    irrelevant_indices = artist_df.index[artist_df['artist'].isin(irrelevant_artists)].tolist()
+
+
+
+    # finding relevant and irrelevant vectors
+    original_query_vector = features_combined_weighted[query_index, :]
+    if relevant_indices != []:
+        mean_relevant = mean_vector(relevant_indices, features_combined_weighted)
+    else:
+        mean_relevant = 0
+    if irrelevant_indices != []:
+        mean_irrelevant = mean_vector(irrelevant_indices, features_combined_weighted)
+    else:
+        mean_irrelevant = 0
+    # rocchio parameters
+    alpha, beta, gamma = 1.0, 0.75, 0.25
+
+    # update query vector after performing rocchio
+    updated_query_vector = (alpha * original_query_vector +
+                        beta * mean_relevant -
+                        gamma * mean_irrelevant)
+
+    # updated recommendations
+    updated_similarities = cosine_similarity(updated_query_vector.reshape(1, -1), features_combined_weighted)
+    updated_similarities_df = pd.DataFrame(updated_similarities, columns=artist_df['artist'], index=['Similarity']).T
+    updated_recommendations = updated_similarities_df.sort_values(by='Similarity', ascending=False)
+
+    fin_list = []
+    for i in updated_recommendations.index[1:11]:
+        fin_list.append(i)
+    return json.dumps(fin_list)
+
 # Normalizes certain features in features_vec
 def normalize_feature_vec(features_vec):
     key_idx =feature_dict["key"]
@@ -157,9 +213,10 @@ def normalize_feature_mat(features_mat):
 
 # Sample search using json with pandas
 def json_search(query):
-
+    global query_artist
+    query_artist = query
     if query in artist_set:
-        print(query)
+        # print(query)
         _, tfidf_matrix = lyric_vectorization(artist_df, query)
         _, tfidf_matrix_title = song_name_vectorization(artist_df, query)
         cosine_sim_df_weighted = composite_vector (artist_df, tfidf_matrix, tfidf_matrix_title)
@@ -201,6 +258,43 @@ def home():
 def song_search():
     text = request.args.get("title")
     return json_search(text)
+
+@app.route("/update")
+
+def update_search():
+    # print(query_artist)
+    text = request.args.get("title")
+    temp = request.args.get("json")
+    # print("printing json:")
+    # print(temp)
+    curr_json = html_to_json.convert(temp)
+    
+    df = curr_json['div']
+
+    # print(df[0]['div'][0]['h3'][0]['_value'][13:])
+
+    # df[0]['div'][0]['div'][0]['div'][0]
+
+    for i in df:
+        if int(i['div'][0]['div'][0]['div'][0]['span'][1]['_value']) != 0:
+            print(i['div'][0]['h3'][0]['_value'][13:])
+            print('is approved')
+            new_json = update_vector(relevant_artists=[i['div'][0]['h3'][0]['_value'][13:]])
+        elif int(i['div'][0]['div'][0]['div'][1]['span'][1]['_value']) != 0:
+            print(i['div'][0]['h3'][0]['_value'][13:])
+            print('is disapproved')
+            new_json = update_vector(irrelevant_artists=[i['div'][0]['h3'][0]['_value'][13:]])
+            
+
+    # for i in df:
+        # print(i['div'])
+        # print(type(i['div']))
+
+    # curr_json = json.loads(temp)
+    # text = request.args.get("title")
+    return new_json
+
+
 
 if 'DB_NAME' not in os.environ:
     app.run(debug=True,host="0.0.0.0",port=5000)

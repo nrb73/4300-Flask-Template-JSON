@@ -356,6 +356,19 @@
                         rating.classList.add("rating-selected");
 
                         const likeOrDislike = likeRating === rating ? "like" : "dislike";
+
+                        // console.log(curr_html)
+                        console.log(document.getElementById("filter-text-val").value)
+                        // var curr_html = document.getElementById("answer-box").innerHTML
+                        // document.getElementById("answer-box").innerHTML = ""
+                        fetch("/update?" + new URLSearchParams(({json: document.getElementById("answer-box").innerHTML})))
+                        .then(document.getElementById("answer-box").innerHTML = "")
+                        .then((response) => response.json())
+                        .then((data) => data.forEach(row => {
+                        let tempDiv = document.createElement("div")
+                        tempDiv.innerHTML = answerBoxTemplate(row)
+                        document.getElementById("answer-box").appendChild(tempDiv)
+                        }));
                         // const response = await fetch(`/artists/${artistId}/${likeOrDislike}`);
                         // const body = await response.json();
                     })
