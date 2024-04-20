@@ -205,7 +205,18 @@ def get_lyrics(token, song):
   
 curr_token = get_token()
 
-artist_list = ["Rihanna", "Morgan Wallen", "Manuel Turizo", "JUL", "Gazo", "Feid", "Adele", "Lana Del Rey", "Tony Effe", "Lady Gaga", "Tiakola", "Junior H", "Creepy Nuts", "Bruno Mars", "Tate McRae", "Natasha Bedingfield", "Bizarrap", "Fuerza Regida", "Benson Boone", "Travis Scott", "Chris Brown", "Shakira", "The Weeknd", "Tiu00e9sto", "Peso Pluma", "Teddy Swims", "Arijit Singh", "Tyla", "Quevedo", "Diljit Dosanjh", "Jimin", "u00a5$", "SZA", "CYRIL", "Emilia", "LINKIN PARK", "floyymenor", "Mora", "Noah Kahan", "Xavi", "Ty Dolla $ign", "Zach Bryan", "Hozier", "Pritam", "Taylor Swift", "Justin Bieber", "Future", "Miley Cyrus", "21 Savage", "Burna Boy", "Luke Combs", "BTS", "Kanye West", "Tayc", "KAROL G", "Rauw Alejandro", "Frank Ocean", "Dadju", "Metro Boomin", "V", "Beyoncu00e9", "Coldplay", "Kacey Musgraves", "Doja Cat", "Eminem", "Werenoi", "Disturbed", "Bad Bunny", "Dua Lipa", "Olivia Rodrigo", "Natanael Cano", "Ariana Grande", "Anuel AA", "YOASOBI", "Mrs. Green Apple", "LE SSERAFIM", "Maluma", "YG Marley", "Billie Eilish", "Justin Timberlake", "Myke Towers", "Ed Sheeran", "David Guetta", "Cris Mj", "Jung Kook", "Jack Harlow", "Ayra Starr", "Ninho", "Drake", "Jere Klein", "Carin Leon", "Arctic Monkeys", "Djo", "One Direction", "Grupo Frontera", "Ofenbach", "Harry Styles", "Milo j", "Playboi Carti"]
+artist_list = ["Rihanna", "Morgan Wallen", "Manuel Turizo", "JUL", "Gazo", "Feid", "Adele", "Lana Del Rey", "Tony Effe", 
+               "Lady Gaga", "Tiakola", "Junior H", "Creepy Nuts", "Bruno Mars", "Tate McRae", "Natasha Bedingfield", 
+               "Bizarrap", "Fuerza Regida", "Benson Boone", "Travis Scott", "Chris Brown", "Shakira", "The Weeknd", 
+               "Tiu00e9sto", "Peso Pluma", "Teddy Swims", "Arijit Singh", "Tyla", "Quevedo", "Diljit Dosanjh", "Jimin", 
+               "u00a5$", "SZA", "CYRIL", "Emilia", "LINKIN PARK", "floyymenor", "Mora", "Noah Kahan", "Xavi", "Ty Dolla $ign", 
+               "Zach Bryan", "Hozier", "Pritam", "Taylor Swift", "Justin Bieber", "Future", "Miley Cyrus", "21 Savage", 
+               "Burna Boy", "Luke Combs", "BTS", "Kanye West", "Tayc", "KAROL G", "Rauw Alejandro", "Frank Ocean", "Dadju", 
+               "Metro Boomin", "V", "Beyoncu00e9", "Coldplay", "Kacey Musgraves", "Doja Cat", "Eminem", "Werenoi", "Disturbed", 
+               "Bad Bunny", "Dua Lipa", "Olivia Rodrigo", "Natanael Cano", "Ariana Grande", "Anuel AA", "YOASOBI", 
+               "Mrs. Green Apple", "LE SSERAFIM", "Maluma", "YG Marley", "Billie Eilish", "Justin Timberlake", "Myke Towers", 
+               "Ed Sheeran", "David Guetta", "Cris Mj", "Jung Kook", "Jack Harlow", "Ayra Starr", "Ninho", "Drake", "Jere Klein", 
+               "Carin Leon", "Arctic Monkeys", "Djo", "One Direction", "Grupo Frontera", "Ofenbach", "Harry Styles", "Milo j", "Playboi Carti"]
 
 artist_to_song_dict , song_to_artist_dict, song_id_to_name = create_top_songs_matrix_by(curr_token, artist_list)
 
