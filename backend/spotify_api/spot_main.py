@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import os
 import base64
+import requests
 from requests import post, get
 import json
 import numpy as np
@@ -10,6 +11,7 @@ from json import JSONEncoder
 from pathlib import Path
 import re
 from lyricsgenius import Genius
+from bs4 import BeautifulSoup
 load_dotenv()
 
 #GLOBAL VARIABLES
@@ -183,13 +185,94 @@ def get_lyrics(token, song):
   query_url = url_1 + query 
   result_1 = get(query_url, headers=headers)
   json_result_1 = json.loads(result_1.content)['tracks']['items'][0]['id']
-  print(json_result_1)
+  # print(json_result_1)
   song_id = str(json_result_1)
   url = f"https://spclient.wg.spotify.com/color-lyrics/v2/track/{song_id}"
   result_2 = get(url, headers=headers)
   # json_result_2 = json.loads(result.content)
-  print(result_2)
+  # print(result_2)
 
+def get_artist_albums(token, a_id):
+
+  album_list = []
+
+  query_url = f"https://api.spotify.com/v1/artists/{a_id}/albums?include_groups=album"
+  headers = get_header(token)
+  result_1 = get(query_url, headers=headers)
+  # json_result_1 = json.loads(result_1.content)['tracks']['items'][0]['id']
+  json_result_1 = json.loads(result_1.content)
+  # print(json_result_1['total'])
+  for i in json_result_1['items']:
+    album_list.append(i['name'])
+      
+  return album_list
+    # print("NEXT")
+
+def url_constructor(album_tokens, artist_tokens):
+
+  #BASE URL
+  url = f'https://pitchfork.com/reviews/albums/'
+
+  #Add Artist Name:
+  if len(artist_tokens) > 1:
+    ttl = len(artist_tokens)
+    for i in range(ttl):
+      if i != (ttl - 1):
+        url = url + artist_tokens[i] + '-'
+      else:
+        url = url + artist_tokens[i]
+  else:
+    url = url + artist_tokens[0]
+
+  #Add album name:
+  for t in album_tokens:
+    url = url + '-' + t
+  
+  return url
+
+def get_artist_reviews(artist_to_albums):
+
+  dict_3 = {}
+
+  for artist in artist_to_albums.keys():
+    print(artist)
+    s = artist_to_albums[artist]
+
+    total_size = len(s)
+    total_reviews = 0
+    total_failed = 0
+
+
+    for album in s:
+      album_tokens = re.findall(r"\w+(?:'\w+)?|[^\w\s]", album.lower())
+      artist_tokens = re.findall(r"\w+(?:'\w+)?|[^\w\s]", artist.lower())
+      # print(tokens)
+
+      url = url_constructor(album_tokens, artist_tokens)
+
+      print(f"final searching URL is: {url}")
+      try:
+        x = requests.get(url)
+        assert(x.status_code == 200)
+        dict_3[artist] = x
+
+        souped = BeautifulSoup(x.text)
+        temp = souped.find_all("div", class_="body__inner-container")
+        # print(temp)
+        temp_2 = re.sub(r'\<(.*?)\>', '', str(temp))
+        print(f"Review for '{album}' by {artist}:")
+        print(temp_2)
+        total_reviews += 1
+        # print(f'Succeded to load review for: {album}')
+      except:
+        total_failed += 1
+        # print(f'failed to load review for: {album}')
+
+    print(f"Artist name: {artist}")
+    print(f"total albums found: {total_size}")
+    print(f"total reviews found: {total_reviews}")
+  return dict_3
+    
 # def dataframe_creation(token, artist_to_song_dict, song_id_to_name, a):
 #   song_by_feature_mat, song_id_to_matrix_index = artist_to_song_dict[a]
 
@@ -205,47 +288,61 @@ def get_lyrics(token, song):
   
 curr_token = get_token()
 
-artist_list = ["Rihanna", "Morgan Wallen", "Manuel Turizo", "JUL", "Gazo", "Feid", "Adele", "Lana Del Rey", "Tony Effe", "Lady Gaga", "Tiakola", "Junior H", "Creepy Nuts", "Bruno Mars", "Tate McRae", "Natasha Bedingfield", "Bizarrap", "Fuerza Regida", "Benson Boone", "Travis Scott", "Chris Brown", "Shakira", "The Weeknd", "Tiu00e9sto", "Peso Pluma", "Teddy Swims", "Arijit Singh", "Tyla", "Quevedo", "Diljit Dosanjh", "Jimin", "u00a5$", "SZA", "CYRIL", "Emilia", "LINKIN PARK", "floyymenor", "Mora", "Noah Kahan", "Xavi", "Ty Dolla $ign", "Zach Bryan", "Hozier", "Pritam", "Taylor Swift", "Justin Bieber", "Future", "Miley Cyrus", "21 Savage", "Burna Boy", "Luke Combs", "BTS", "Kanye West", "Tayc", "KAROL G", "Rauw Alejandro", "Frank Ocean", "Dadju", "Metro Boomin", "V", "Beyoncu00e9", "Coldplay", "Kacey Musgraves", "Doja Cat", "Eminem", "Werenoi", "Disturbed", "Bad Bunny", "Dua Lipa", "Olivia Rodrigo", "Natanael Cano", "Ariana Grande", "Anuel AA", "YOASOBI", "Mrs. Green Apple", "LE SSERAFIM", "Maluma", "YG Marley", "Billie Eilish", "Justin Timberlake", "Myke Towers", "Ed Sheeran", "David Guetta", "Cris Mj", "Jung Kook", "Jack Harlow", "Ayra Starr", "Ninho", "Drake", "Jere Klein", "Carin Leon", "Arctic Monkeys", "Djo", "One Direction", "Grupo Frontera", "Ofenbach", "Harry Styles", "Milo j", "Playboi Carti"]
+artist_list = ["Bruno Mars", "eminem", "drake"]
 
-artist_to_song_dict , song_to_artist_dict, song_id_to_name = create_top_songs_matrix_by(curr_token, artist_list)
+# artist_to_song_dict , song_to_artist_dict, song_id_to_name = create_top_songs_matrix_by(curr_token, artist_list)
+
+artist_to_albums = {}
 
 for a in artist_list:
   #returns dataframe of artist a's song by feature matrix
-  res = make_artist_track_matrix(artist_to_song_dict, song_to_artist_dict,song_id_to_name, a)
+  a_id = search_artist(curr_token, a)
+  albums_temp = get_artist_albums(curr_token, a_id)
+
+  artist_to_albums[a] = albums_temp
+
+# print(artist_to_albums)
+
+reviews = get_artist_reviews(artist_to_albums)
+
+
+  
+
+  # res = make_artist_track_matrix(artist_to_song_dict, song_to_artist_dict,song_id_to_name, a)
   # update_artist_songs(res)
   # artist_set.add(a)
-  dataframes.append(res)
+  # dataframes.append(res)
   # print(res)
 
-fin_dataframe = pd.concat(dataframes, join='outer', axis=0)
+# fin_dataframe = pd.concat(dataframes, join='outer', axis=0)
 
-print(fin_dataframe)
+# print(fin_dataframe)
 
-succ = 0
-f = 0
-lyrics_list = []
-for song_name, feats in fin_dataframe.iterrows():
-  try:
-    artist_name = song_to_artist_dict[song_name]
-    song_name = re.sub(r's+', '%20', song_name)
-    artist_name = re.sub(r's+', '%20', artist_name)
-    # print(song_name)
-    # print(artist_name)
-  # song_name.replace(/s+/g, '%20')
-    str_url = f"https://private-anon-c7cec5a600-lyricsovh.apiary-proxy.com/v1/{artist_name}/{song_name}"
-    result = get(str_url)
-    json_result = json.loads(result.content)["lyrics"]
-    # print(json_result)
-    # print("success")
-    succ += 1
+# succ = 0
+# f = 0
+# lyrics_list = []
+# for song_name, feats in fin_dataframe.iterrows():
+#   try:
+#     artist_name = song_to_artist_dict[song_name]
+#     song_name = re.sub(r's+', '%20', song_name)
+#     artist_name = re.sub(r's+', '%20', artist_name)
+#     # print(song_name)
+#     # print(artist_name)
+#   # song_name.replace(/s+/g, '%20')
+#     str_url = f"https://private-anon-c7cec5a600-lyricsovh.apiary-proxy.com/v1/{artist_name}/{song_name}"
+#     result = get(str_url)
+#     json_result = json.loads(result.content)["lyrics"]
+#     # print(json_result)
+#     # print("success")
+#     succ += 1
 
-  except:
+#   except:
     
-    f += 1
-    # print("get failed")
+#     f += 1
+#     # print("get failed")
 
-print(f"total succesful: {succ}")
-print(f"total fail: {f}")
+# print(f"total succesful: {succ}")
+# print(f"total fail: {f}")
   
 
 
