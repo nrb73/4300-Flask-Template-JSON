@@ -265,33 +265,35 @@ def update_search():
     # print(query_artist)
     text = request.args.get("title")
     temp = request.args.get("json")
-    # print("printing json:")
+    # print("printing html:")
     # print(temp)
     curr_json = html_to_json.convert(temp)
+    # print("printing json:")
+    # print(curr_json)
     
     df = curr_json['div']
 
-    # print(df[0]['div'][0]['h3'][0]['_value'][13:])
-
-    # df[0]['div'][0]['div'][0]['div'][0]
-
-    for i in df:
-        if int(i['div'][0]['div'][0]['div'][0]['span'][1]['_value']) != 0:
-            print(i['div'][0]['h3'][0]['_value'][13:])
+    relevant_artists = []
+    irrelevant_artists = []
+    for i in range(1, len(df)):
+        artist_frame = df[i]
+        artist_name = artist_frame['div'][0]['h3'][0]['_value'][13:]
+        print(i)
+        print(artist_frame)
+        print("")
+        if int(artist_frame['div'][0]['div'][0]['div'][0]['span'][1]['_value']) != 0:
+            print(artist_name)
             print('is approved')
-            new_json = update_vector(relevant_artists=[i['div'][0]['h3'][0]['_value'][13:]])
-        elif int(i['div'][0]['div'][0]['div'][1]['span'][1]['_value']) != 0:
-            print(i['div'][0]['h3'][0]['_value'][13:])
+            relevant_artists.append(artist_name)
+        elif int(artist_frame['div'][0]['div'][0]['div'][1]['span'][1]['_value']) != 0:
+            print(artist_name)
             print('is disapproved')
-            new_json = update_vector(irrelevant_artists=[i['div'][0]['h3'][0]['_value'][13:]])
+            irrelevant_artists.append(artist_name)
+
+        new_json = update_vector(relevant_artists, irrelevant_artists)
             
-
-    # for i in df:
-        # print(i['div'])
-        # print(type(i['div']))
-
-    # curr_json = json.loads(temp)
-    # text = request.args.get("title")
+    print("printing new_json:")
+    print(new_json)
     return new_json
 
 
