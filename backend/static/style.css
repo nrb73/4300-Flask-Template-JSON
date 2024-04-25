@@ -92,8 +92,8 @@
 
 .ratings-container {
     display: flex;
-    justify-content: end;
-    padding: 12px;
+    padding-top: 33px;
+    padding-left: 0;
 }
 
 .rating {
@@ -139,7 +139,19 @@
     color: #000000;
 }
 
-img {
-    max-height: 360px;
-    max-width: 640px;
+.artist-box {
+    height: 270px;
+    border: 2px solid green;
+    position: relative;
+
+}
+
+.artist-images {
+    position: absolute;
+    top: 0;
+    right: 0px;
+    margin-top: 1em;
+    max-height: 240px;
+    max-width: 400px;
+    float: right;
 }

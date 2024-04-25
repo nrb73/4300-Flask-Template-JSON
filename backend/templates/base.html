@@ -13,7 +13,7 @@
     <div class="full-body-container">
         <div class="top-text">
             <div>
-                <h1 id="google-4">Search song</h1>
+                <h1 id="google-4">Search Artist</h1>
             </div>
             <div class="input-box" onclick="sendFocus()">
                 <img src="{{ url_for('static', filename='images/mag.png') }}" />
@@ -296,13 +296,14 @@
             return `<span class="material-symbols-outlined" onclick="updateList()">update</span>`
         }
 
-        function answerBoxTemplate(title, titleDesc = "", rating = "", image = "") {
-            console.log(titleDesc)
+        function answerBoxTemplate(title, titleDesc = "", rating = "", image = "", listens = "", reviews = "") {
             return `<div class='artist-box' data-artist-id=${title}>
                 <h3 class='song-name'>Artist Name: ${title}</h3>
                 <p class='artist-name'>Top songs: ${titleDesc}</p>
                 <p class='song-rating'>Artist Similarity Rating: ${rating}</p>
-                <img src=${image} alt="Artist image">
+                <p class='monthly-listens'>Monthly Listens: ${listens}</p>
+                <p class='reviews'>Reviews: ${reviews}</p>
+                <img class='artist-images' src=${image} alt="Artist image">
                 <div class='ratings-container'>
                     <div class='rating'>
                         <span class="rating-button material-icons">thumb_up</span>
