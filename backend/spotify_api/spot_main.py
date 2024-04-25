@@ -10,9 +10,16 @@ import jsonpickle
 from json import JSONEncoder
 from pathlib import Path
 import re
-from lyricsgenius import Genius
+# from lyricsgenius import Genius
 from bs4 import BeautifulSoup
 load_dotenv()
+
+# ROOT_PATH for linking with all your files. 
+# Feel free to use a config.py or settings.py with a global export variable
+os.environ['ROOT_PATH'] = os.path.abspath(os.path.join("..",os.curdir))
+
+# Get the directory of the current script
+current_directory = os.path.dirname(os.path.abspath(__file__))
 
 #GLOBAL VARIABLES
 
@@ -22,8 +29,13 @@ load_dotenv()
 
 # artist_set = jsonpickle.decode(artist_json_obj)
 
+artist_df = pd.read_csv(r'C:\Users\15169\Documents\CS 4300\scooby_jukebox\4300-Flask-Template-JSON\backend\kaggle_data\new_data.csv')
+artist_df = artist_df.dropna()
 
-artist_set = set()
+lst = artist_df.loc[:, "artist"]
+artist_list = []
+for i in lst:
+  artist_list.append(str(i))
 
 
 # with open("backend/spotify_api/database_jsons/small_songs_set.json", "r") as openfile: 
@@ -208,6 +220,19 @@ def get_artist_albums(token, a_id):
   return album_list
     # print("NEXT")
 
+def get_artist_image(token, a_id):
+
+  query_url = f"https://api.spotify.com/v1/artists/{a_id}"
+  headers = get_header(token)
+  result = get(query_url, headers=headers)
+  json_result = json.loads(result.content)['images']
+  # print(json_result)
+  if len(json_result) == 0:
+    return ""
+  json_result = json_result[0]['url']
+
+  return json_result
+
 def url_constructor(album_tokens, artist_tokens):
 
   #BASE URL
@@ -288,22 +313,31 @@ def get_artist_reviews(artist_to_albums):
   
 curr_token = get_token()
 
-artist_list = ["Bruno Mars", "eminem", "drake"]
+# artist_list = ["Bruno Mars", "eminem", "drake"]
 
 # artist_to_song_dict , song_to_artist_dict, song_id_to_name = create_top_songs_matrix_by(curr_token, artist_list)
 
 artist_to_albums = {}
+artist_images = []
 
 for a in artist_list:
   #returns dataframe of artist a's song by feature matrix
   a_id = search_artist(curr_token, a)
-  albums_temp = get_artist_albums(curr_token, a_id)
+  # albums_temp = get_artist_albums(curr_token, a_id)
+  # artist_to_albums[a] = albums_temp
 
-  artist_to_albums[a] = albums_temp
+  artist_images.append((a, get_artist_image(curr_token, a_id)))
 
-# print(artist_to_albums)
+# new_df = pd.DataFrame(artist_images, columns=['artist', 'image'])
+# print(new_df)
 
-reviews = get_artist_reviews(artist_to_albums)
+# p = r"C:\Users\15169\Documents\CS 4300\scooby_jukebox\4300-Flask-Template-JSON\backend\spotify_api\database_jsons\artist_images_dataframes.json"
+# new_df.to_json(path_or_buf=p, orient='split')
+
+# with open(r"C:\Users\15169\Documents\CS 4300\scooby_jukebox\4300-Flask-Template-JSON\backend\spotify_api\database_jsons\artist_images_dataframes.json", "w") as openfile:
+#   json.dump(new_df, openfile)
+
+# reviews = get_artist_reviews(artist_to_albums)
 
 
   

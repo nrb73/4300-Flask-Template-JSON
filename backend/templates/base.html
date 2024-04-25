@@ -296,11 +296,13 @@
             return `<span class="material-symbols-outlined" onclick="updateList()">update</span>`
         }
 
-        function answerBoxTemplate(title, titleDesc = "", rating = "") {
+        function answerBoxTemplate(title, titleDesc = "", rating = "", image = "") {
+            console.log(titleDesc)
             return `<div class='artist-box' data-artist-id=${title}>
                 <h3 class='song-name'>Artist Name: ${title}</h3>
                 <p class='artist-name'>Top songs: ${titleDesc}</p>
                 <p class='song-rating'>Artist Similarity Rating: ${rating}</p>
+                <img src=${image} alt="Artist image">
                 <div class='ratings-container'>
                     <div class='rating'>
                         <span class="rating-button material-icons">thumb_up</span>
@@ -328,9 +330,10 @@
                     document.getElementById("answer-box").appendChild(tempDiv))
                 .then((response) => response.json())
                 .then((data) => data.forEach(row => {
-
+                    artist_name = row[0]
+                    artist_image = row[1]
                     let tempDiv = document.createElement("div")
-                    tempDiv.innerHTML = answerBoxTemplate(row)
+                    tempDiv.innerHTML = answerBoxTemplate(artist_name, titleDesc = "", rating = "", image = artist_image)
                     document.getElementById("answer-box").appendChild(tempDiv)
                 }));
 
@@ -345,7 +348,6 @@
                 ratings.forEach(rating => {
                     const button = rating.querySelector(".rating-button");
                     const count = rating.querySelector(".rating-count");
-                    console.log("Inside for each loop");
 
                     !button.addEventListener("click", async () => {
                         console.log("Inside event listener")
@@ -385,8 +387,10 @@
                         document.getElementById("answer-box").appendChild(tempDiv))
                     .then((response) => response.json())
                     .then((data) => data.forEach(row => {
+                        artist_name = row[0]
+                        artist_image = row[1]
                         let tempDiv = document.createElement("div")
-                        tempDiv.innerHTML = answerBoxTemplate(row)
+                        tempDiv.innerHTML = answerBoxTemplate(artist_name, titleDesc = "", rating = "", image = artist_image)
                         document.getElementById("answer-box").appendChild(tempDiv)
                     }));
                 // const response = await fetch(`/artists/${artistId}/${likeOrDislike}`);
