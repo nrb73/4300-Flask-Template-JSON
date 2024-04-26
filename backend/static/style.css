@@ -140,8 +140,9 @@
 }
 
 .artist-box {
+    margin-top: 50px;
     height: 270px;
-    border: 2px solid green;
+    /* border: 2px solid green; */
     position: relative;
 
 }
