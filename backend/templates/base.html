@@ -3,17 +3,22 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
+    rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
 <body>
     <div class="full-body-container">
         <div class="top-text">
             <div>
-                <h1 id="google-4">Search song</h1>
+                <h1 id="google-4">Search Artist</h1>
             </div>
             <div class="input-box" onclick="sendFocus()">
                 <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                <input placeholder="Search for an artist" id="filter-text-val" onkeyup="filterText()" list="big_artists">
+                <input placeholder="Search for an artist" id="filter-text-val" onkeyup="filterText()"
+                    list="big_artists">
                 <datalist id="big_artists">
                     <option value="2Pac"></option>
                     <option value="50 Cent"></option>
@@ -220,7 +225,7 @@
                     <option value="Rihanna"></option>
                     <option value="Robin Thicke"></option>
                     <option value="Royce da 5'9""></option>
-                    <option value="Sage Francis"></option>
+                    <option value=" Sage Francis"></option>
                     <option value="Saul Williams"></option>
                     <option value="Scarface"></option>
                     <option value="Sean Price"></option>
@@ -277,22 +282,28 @@
                     <option value="YoungBloodZ"></option>
                     <option value="dead prez"></option>
                     <option value="eLZhi"></option>
-                <datalist>
+                    <datalist>
 
             </div>
         </div>
         <div id="answer-box" onclick="feedback()">
-
+            <!-- <span class="material-symbols-outlined" onclick="updateList()">update</span> -->
         </div>
     </div>
 
     <script>
+        function updateButtonTemplate() {
+            return `<span class="material-symbols-outlined" onclick="updateList()">update</span>`
+        }
 
-        function answerBoxTemplate(title,  titleDesc = "", rating = "") {
+        function answerBoxTemplate(title, titleDesc = "", rating = "", image = "", listens = "", reviews = "") {
             return `<div class='artist-box' data-artist-id=${title}>
                 <h3 class='song-name'>Artist Name: ${title}</h3>
                 <p class='artist-name'>Top songs: ${titleDesc}</p>
                 <p class='song-rating'>Artist Similarity Rating: ${rating}</p>
+                <p class='monthly-listens'>Monthly Listens: ${listens}</p>
+                <p class='reviews'>Reviews: ${reviews}</p>
+                <img class='artist-images' src=${image} alt="Artist image">
                 <div class='ratings-container'>
                     <div class='rating'>
                         <span class="rating-button material-icons">thumb_up</span>
@@ -306,24 +317,29 @@
             </div>`
         }
 
-        function sendFocus(){
+        function sendFocus() {
             document.getElementById('filter-text-val').focus()
         }
 
-        function filterText(){
+        function filterText() {
             document.getElementById("answer-box").innerHTML = ""
+            let tempDiv = document.createElement("div")
             console.log(document.getElementById("filter-text-val").value)
             fetch("/songs?" + new URLSearchParams({ title: document.getElementById("filter-text-val").value }).toString())
-            .then((response) => response.json())
-            .then((data) => data.forEach(row => {
-                
-                let tempDiv = document.createElement("div")
-                tempDiv.innerHTML = answerBoxTemplate(row)
-                document.getElementById("answer-box").appendChild(tempDiv)
-            }));
+                .then(
+                    tempDiv.innerHTML = updateButtonTemplate(),
+                    document.getElementById("answer-box").appendChild(tempDiv))
+                .then((response) => response.json())
+                .then((data) => data.forEach(row => {
+                    artist_name = row[0]
+                    artist_image = row[1]
+                    let tempDiv = document.createElement("div")
+                    tempDiv.innerHTML = answerBoxTemplate(artist_name, titleDesc = "", rating = "", image = artist_image)
+                    document.getElementById("answer-box").appendChild(tempDiv)
+                }));
 
         }
-        
+
         function feedback() {
             document.querySelectorAll(".artist-box").forEach(box => {
                 const artistId = box.dataset.artistId
@@ -333,7 +349,6 @@
                 ratings.forEach(rating => {
                     const button = rating.querySelector(".rating-button");
                     const count = rating.querySelector(".rating-count");
-                    console.log("Inside for each loop");
 
                     !button.addEventListener("click", async () => {
                         console.log("Inside event listener")
@@ -357,24 +372,32 @@
 
                         const likeOrDislike = likeRating === rating ? "like" : "dislike";
 
-                        // console.log(curr_html)
-                        console.log(document.getElementById("filter-text-val").value)
-                        // var curr_html = document.getElementById("answer-box").innerHTML
-                        // document.getElementById("answer-box").innerHTML = ""
-                        fetch("/update?" + new URLSearchParams(({json: document.getElementById("answer-box").innerHTML})))
-                        .then(document.getElementById("answer-box").innerHTML = "")
-                        .then((response) => response.json())
-                        .then((data) => data.forEach(row => {
-                        let tempDiv = document.createElement("div")
-                        tempDiv.innerHTML = answerBoxTemplate(row)
-                        document.getElementById("answer-box").appendChild(tempDiv)
-                        }));
-                        // const response = await fetch(`/artists/${artistId}/${likeOrDislike}`);
-                        // const body = await response.json();
                     })
                 });
             });
         }
-            
+
+        function updateList() {
+            const updateButton = document.querySelector(".material-symbols-outlined")
+
+            !updateButton.addEventListener("click", async () => {
+                let tempDiv = document.createElement("div")
+                console.log(document.getElementById("filter-text-val").value)
+                fetch("/update?" + new URLSearchParams(({ json: document.getElementById("answer-box").innerHTML })))
+                    .then(document.getElementById("answer-box").innerHTML = "", tempDiv.innerHTML = updateButtonTemplate(),
+                        document.getElementById("answer-box").appendChild(tempDiv))
+                    .then((response) => response.json())
+                    .then((data) => data.forEach(row => {
+                        artist_name = row[0]
+                        artist_image = row[1]
+                        let tempDiv = document.createElement("div")
+                        tempDiv.innerHTML = answerBoxTemplate(artist_name, titleDesc = "", rating = "", image = artist_image)
+                        document.getElementById("answer-box").appendChild(tempDiv)
+                    }));
+                // const response = await fetch(`/artists/${artistId}/${likeOrDislike}`);
+                // const body = await response.json();
+            });
+        }
+
     </script>
 </body>

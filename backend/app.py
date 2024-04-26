@@ -42,6 +42,8 @@ artist_df = pd.read_csv(current_directory + '/kaggle_data/new_data.csv')
 
 artist_df = artist_df.dropna()
 
+with open(current_directory + '/spotify_api/database_jsons/artist_images_dataframes.json', "r") as openfile: 
+  artist_images_json = json.load(openfile)
 
 
 # defining weights for features
@@ -54,16 +56,17 @@ features_combined_weighted = None
 
 query_artist = None
 
-for i, j in artist_df.iterrows():
-    print("index:")
-    print(i)
-    print("row:")
-    print(j.dtype)
+artist_to_image = {}
+for pair in artist_images_json["data"]:
+    artist_name = pair[0]
+    artist_img = pair[1]
+    artist_to_image[artist_name] = artist_img
 
 lst = artist_df.loc[:, "artist"]
 artist_set = []
 for i in lst:
   artist_set.append(str(i))
+
 
 debug = False
 
@@ -103,11 +106,11 @@ def lyric_vectorization (artist_df, query_artist):
 
 def song_name_vectorization (artist_df, query_artist):
     # FINDING ARTIST SIMILARITY USING ONLY SONG TITLES
-    print("start func snv")
+    # print("start func snv")
     #finding tfidf scores
     tfidf_vectorizer_title = TfidfVectorizer(max_features=10000, stop_words='english', ngram_range=(1,2))
     # print(artist_df['song_titles'].index(np.nan))
-    print(artist_df['song_titles'])
+    # print(artist_df['song_titles'])
     tfidf_matrix_title = tfidf_vectorizer_title.fit_transform(artist_df['song_titles'])
 
     #finding cosine similarity
@@ -188,7 +191,7 @@ def update_vector(relevant_artists=[], irrelevant_artists=[]):
     fin_list = []
     for i in updated_recommendations.index[1:11]:
         fin_list.append(i)
-    return json.dumps(fin_list)
+    return fin_list
 
 # Normalizes certain features in features_vec
 def normalize_feature_vec(features_vec):
@@ -237,15 +240,16 @@ def json_search(query):
         # print("similarity index")
         # print(np.shape(similarity_index))
         # print(similarity_index)
-        print("rankings indicies:")
-        print(rankings)
+        # print("rankings indicies:")
+        # print(rankings)
         res = []
         ranks = []
         for r in rankings.keys()[:10]:
-            res.append(r)
+            res.append([r, artist_to_image[r]])
             ranks.append(rankings[r])
+        print("res:")
+        print(res)
         return json.dumps(res)
-        # rankings.to_json
     else: 
         return json.dumps([])
 
@@ -262,36 +266,39 @@ def song_search():
 @app.route("/update")
 
 def update_search():
+    global artist_to_image
     # print(query_artist)
-    text = request.args.get("title")
     temp = request.args.get("json")
-    # print("printing json:")
+    # print("printing html:")
     # print(temp)
     curr_json = html_to_json.convert(temp)
-    
+    # print("printing json:")
+    # print(curr_json)
+    temp_lst = []
     df = curr_json['div']
 
-    # print(df[0]['div'][0]['h3'][0]['_value'][13:])
+    relevant_artists = []
+    irrelevant_artists = []
+    for i in range(1, len(df)):
+        artist_frame = df[i]
+        artist_name = artist_frame['div'][0]['h3'][0]['_value'][13:]
 
-    # df[0]['div'][0]['div'][0]['div'][0]
+        if int(artist_frame['div'][0]['div'][0]['div'][0]['span'][1]['_value']) != 0:
+            relevant_artists.append(artist_name)
+        elif int(artist_frame['div'][0]['div'][0]['div'][1]['span'][1]['_value']) != 0:
+            irrelevant_artists.append(artist_name)
 
-    for i in df:
-        if int(i['div'][0]['div'][0]['div'][0]['span'][1]['_value']) != 0:
-            print(i['div'][0]['h3'][0]['_value'][13:])
-            print('is approved')
-            new_json = update_vector(relevant_artists=[i['div'][0]['h3'][0]['_value'][13:]])
-        elif int(i['div'][0]['div'][0]['div'][1]['span'][1]['_value']) != 0:
-            print(i['div'][0]['h3'][0]['_value'][13:])
-            print('is disapproved')
-            new_json = update_vector(irrelevant_artists=[i['div'][0]['h3'][0]['_value'][13:]])
+    lst = update_vector(relevant_artists, irrelevant_artists)
+
+    for artist in lst:
+        temp_lst.append([artist, artist_to_image[artist]])
             
+    print("printing list:")
+    print(temp_lst)
+    new_json = json.dumps(temp_lst)
+    print("pring new_json:")
+    print(new_json)
 
-    # for i in df:
-        # print(i['div'])
-        # print(type(i['div']))
-
-    # curr_json = json.loads(temp)
-    # text = request.args.get("title")
     return new_json
 
 
