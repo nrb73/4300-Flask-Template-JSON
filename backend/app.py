@@ -42,7 +42,7 @@ artist_df = pd.read_csv(current_directory + '/kaggle_data/new_data.csv')
 
 artist_df = artist_df.dropna()
 
-with open(current_directory + r'\spotify_api\database_jsons\artist_images_dataframes.json', "r") as openfile: 
+with open(current_directory + '/spotify_api/database_jsons/artist_images_dataframes.json', "r") as openfile: 
   artist_images_json = json.load(openfile)
 
 
