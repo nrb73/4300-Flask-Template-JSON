@@ -22,6 +22,8 @@
 
 #google-4 {
     color: #F4B400;
+    margin-top: 0;
+    padding-top: 40px;
 }
 
 #google-3 {
@@ -56,6 +58,7 @@
     margin-top: 10px;
     padding: 12px;
     width: 600px;
+    background-color: white;
 }
 
 .input-box img {
@@ -155,4 +158,19 @@
     max-height: 240px;
     max-width: 400px;
     float: right;
+}
+
+.top-text {
+    padding-bottom: 60px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background-color: #009578;
+}
+
+.artist {
+    position: absolute;
+    max-width: 30%;
+    max-height: 30%;
+    left: 8.5%;
 }
