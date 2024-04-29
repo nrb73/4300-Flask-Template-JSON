@@ -11,6 +11,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import MultiLabelBinarizer
 import html_to_json
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+nltk.download('stopwords')
+nltk.download('wordnet')
 
 # ROOT_PATH for linking with all your files. 
 # Feel free to use a config.py or settings.py with a global export variable
@@ -38,7 +43,7 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 # #retrieve set of artists in the database
 # small_songs_list = small_songs_df.index.tolist()
 
-artist_df = pd.read_csv(current_directory + '/kaggle_data/new_data.csv')
+artist_df = pd.read_csv(current_directory + '/kaggle_data/final_artist_dataframe.csv')
 
 artist_df = artist_df.dropna()
 
@@ -47,10 +52,17 @@ with open(current_directory + '/spotify_api/database_jsons/artist_images_datafra
 
 
 # defining weights for features
+# weight_titles = 0.3 #since song titles did not give accurate results, weighted less
+# weight_lyrics = 1.5 #weighted more since it was more accurate
+# weight_views = 1.0 
+# weight_tags = 1.0
+  
 weight_titles = 0.3 #since song titles did not give accurate results, weighted less
 weight_lyrics = 1.5 #weighted more since it was more accurate
 weight_views = 1.0 
 weight_tags = 1.0
+weight_score = 0.5
+weight_reviews = 1.4 
 
 features_combined_weighted = None
 
@@ -122,33 +134,70 @@ def song_name_vectorization (artist_df, query_artist):
     print("end snv")
     return (similar_artists_title[1:], tfidf_matrix_title)
 
-def composite_vector (artist_df, tfidf_matrix, tfidf_matrix_title):
+def review_vectorization (artist_df, query_artist):
+    stop_words = set(stopwords.words('english'))
+    extended_stopwords = set(stopwords.words('english'))
+    additional_stopwords = {
+    'album', 'albums', 'song', 'songs', 'music', 'sound', 'track', 'tracks', 'record', 'records', 'single', 'singles',
+    'artist', 'artists', 'band', 'bands', 'release', 'releases', 'released', 'make', 'makes', 'made', 'say', 'says',
+    'put', 'puts', 'get', 'gets', 'got', 'go', 'goes', 'going', 'seem', 'seems', 'seemed', 'include', 'includes',
+    'included', 'featuring', 'feature', 'features', 'featured', 'feel', 'feels', 'felt', 'keep', 'keeps', 'kept',
+    'great', 'good', 'big', 'large', 'small', 'new', 'old', 'young', 'real', 'better', 'best', 'bad', 'worst',
+    'major', 'minor', 'own', 'same', 'different', 'high', 'low', 'long', 'short', 'first', 'last', 'next', 'previous',
+    'early', 'late', 'modern', 'year', 'years', 'time', 'times', 'day', 'days', 'week', 'weeks',
+    'month', 'months', 'like', 'just', 'also', 'well', 'still', 'back', 'even', 'way', 'much', 'ever', 'never',
+    'every', 'around', 'another', 'many', 'few', 'lots', 'lot', 'part', 'one', 'two', 'three', 'four', 'five',
+    'six', 'seven', 'eight', 'nine', 'ten', 'several', 'various', 'whether', 'however', 'though', 'although',
+    'fashioned', 'im'
+    }
+
+    extended_stopwords.update(additional_stopwords)
+
+    tfidf_vectorizer_reviews = TfidfVectorizer(max_features=7500, stop_words=stop_words, ngram_range=(1,2))
+    tfidf_matrix_reviews = tfidf_vectorizer_reviews.fit_transform(artist_df['Reviews'])
+
+    cosine_sim_reviews = cosine_similarity(tfidf_matrix_reviews, tfidf_matrix_reviews)
+    cosine_sim_df_reviews = pd.DataFrame(cosine_sim_reviews, index=artist_df['artist'], columns=artist_df['artist'])
+
+    # get similarity scores for Eminem
+    similar_artists_review = cosine_sim_df_reviews[f'{query_artist}'].sort_values(ascending=False)
+
+    return (similar_artists_review[1:], tfidf_matrix_reviews)
+
+def composite_vector (artist_df, tfidf_matrix_lyrics, tfidf_matrix_title, tfidf_matrix_reviews):
     global features_combined_weighted
     scaler = MinMaxScaler()
     view_counts_normalized = scaler.fit_transform(artist_df[['average_views']])
     tag_binarizer = MultiLabelBinarizer()
     tags_transformed = tag_binarizer.fit_transform(artist_df['tags'])
+    review_scores_normalized = scaler.fit_transform(artist_df[['average_score']])
 
-    # defining weights for features
+    # defining weights for features - can change this
     weight_titles = 0.3 #since song titles did not give accurate results, weighted less
     weight_lyrics = 1.5 #weighted more since it was more accurate
     weight_views = 1.0 
     weight_tags = 1.0
+    weight_score = 0.5
+    weight_reviews = 1.4 #captures intricate similarities between artists, so weighted higher
 
-    # applying weights to features
+# applying weights to features
     weighted_titles = tfidf_matrix_title.toarray() * weight_titles
-    weighted_lyrics = tfidf_matrix.toarray() * weight_lyrics
+    weighted_lyrics = tfidf_matrix_lyrics.toarray() * weight_lyrics
     weighted_views = view_counts_normalized * weight_views
     weighted_tags = tags_transformed * weight_tags
+    weighted_score = review_scores_normalized * weight_score
+    weighted_reviews = tfidf_matrix_reviews.toarray() * weight_reviews
 
-    features_combined_weighted = np.hstack((weighted_titles, weighted_lyrics, weighted_views, weighted_tags))
+#MAKING THE COMPOSITE VECTOR WITH REVIEWS
 
-    #COSINE SIMILARITY FOR COMPOSITE VECTOR
+    features_combined_weighted_review = np.hstack((weighted_titles, weighted_lyrics, weighted_views, weighted_tags, weighted_score, weighted_reviews))
 
-    cosine_sim_weighted = cosine_similarity(features_combined_weighted, features_combined_weighted)
-    cosine_sim_df_weighted = pd.DataFrame(cosine_sim_weighted, index=artist_df['artist'], columns=artist_df['artist'])
+#COSINE SIMILARITY FOR COMPOSITE VECTOR
 
-    return cosine_sim_df_weighted
+    cosine_sim_weighted_review = cosine_similarity(features_combined_weighted_review, features_combined_weighted_review)
+    cosine_sim_df_weighted_review = pd.DataFrame(cosine_sim_weighted_review, index=artist_df['artist'], columns=artist_df['artist'])
+
+    return cosine_sim_df_weighted_review
 
 
 def mean_vector(indices, feature_matrix):
@@ -189,8 +238,18 @@ def update_vector(relevant_artists=[], irrelevant_artists=[]):
     updated_recommendations = updated_similarities_df.sort_values(by='Similarity', ascending=False)
 
     fin_list = []
-    for i in updated_recommendations.index[1:11]:
-        fin_list.append(i)
+    temp_count = 0
+    i = 0
+    while temp_count < 10:
+        a_name = updated_recommendations.index[i]
+        if a_name not in irrelevant_artists:
+            fin_list.append(a_name)
+            count += 1
+        else:
+            pass
+        i += 1
+    # for i in updated_recommendations.index[1:11]:
+    #     fin_list.append(i)
     return fin_list
 
 # Normalizes certain features in features_vec
@@ -222,7 +281,8 @@ def json_search(query):
         # print(query)
         _, tfidf_matrix = lyric_vectorization(artist_df, query)
         _, tfidf_matrix_title = song_name_vectorization(artist_df, query)
-        cosine_sim_df_weighted = composite_vector (artist_df, tfidf_matrix, tfidf_matrix_title)
+        _, tfidf_matrix_reviews = review_vectorization(artist_df, query)
+        cosine_sim_df_weighted = composite_vector (artist_df, tfidf_matrix, tfidf_matrix_title, tfidf_matrix_reviews)
         similar_artists_composite = cosine_sim_df_weighted[f'{str(query)}'].sort_values(ascending=False)
         # print(similar_artists_composite[1:])  # start from index 1 to skip artist himself       
         rankings = similar_artists_composite[1:]
