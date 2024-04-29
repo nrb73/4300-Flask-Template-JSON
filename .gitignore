@@ -19,3 +19,4 @@ build/
 *.egg-info/
 helpers/*
 json_template/
+backend/kaggle_data/df_eng.csv
