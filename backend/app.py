@@ -43,11 +43,12 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 # #retrieve set of artists in the database
 # small_songs_list = small_songs_df.index.tolist()
 
-artist_df = pd.read_csv(current_directory + '/kaggle_data/final_artist_dataframe.csv')
+artist_df = pd.read_csv(current_directory + r'\kaggle_data\final_artist_dataframe.csv')
+artist_df['Reviews'] = artist_df['Reviews'].fillna(value='')
+artist_df['song_titles'] = artist_df['song_titles'].fillna(value='')
+artist_df['average_score'] = artist_df['average_score'].fillna(value=0.0)
 
-artist_df = artist_df.dropna()
-
-with open(current_directory + '/spotify_api/database_jsons/artist_images_dataframes.json', "r") as openfile: 
+with open(current_directory + r'\spotify_api\database_jsons\artist_images_dataframes.json', "r") as openfile: 
   artist_images_json = json.load(openfile)
 
 
@@ -73,12 +74,18 @@ for pair in artist_images_json["data"]:
     artist_name = pair[0]
     artist_img = pair[1]
     artist_to_image[artist_name] = artist_img
+    # except:
+    #     artist_name = ""
+    #     artist_img = ""
+    #     artist_to_image[] = ""
 
-lst = artist_df.loc[:, "artist"]
+
+lst = artist_df["artist"].tolist()
 artist_set = []
 for i in lst:
   artist_set.append(str(i))
 
+print("first: ", artist_set)
 
 debug = False
 
@@ -131,7 +138,6 @@ def song_name_vectorization (artist_df, query_artist):
 
     # get similarity scores for Eminem
     similar_artists_title = cosine_sim_df_title[f'{query_artist}'].sort_values(ascending=False)
-    print("end snv")
     return (similar_artists_title[1:], tfidf_matrix_title)
 
 def review_vectorization (artist_df, query_artist):
@@ -153,7 +159,7 @@ def review_vectorization (artist_df, query_artist):
 
     extended_stopwords.update(additional_stopwords)
 
-    tfidf_vectorizer_reviews = TfidfVectorizer(max_features=7500, stop_words=stop_words, ngram_range=(1,2))
+    tfidf_vectorizer_reviews = TfidfVectorizer(max_features=7500, stop_words="english", ngram_range=(1,2))
     tfidf_matrix_reviews = tfidf_vectorizer_reviews.fit_transform(artist_df['Reviews'])
 
     cosine_sim_reviews = cosine_similarity(tfidf_matrix_reviews, tfidf_matrix_reviews)
@@ -192,6 +198,7 @@ def composite_vector (artist_df, tfidf_matrix_lyrics, tfidf_matrix_title, tfidf_
 
     features_combined_weighted_review = np.hstack((weighted_titles, weighted_lyrics, weighted_views, weighted_tags, weighted_score, weighted_reviews))
 
+    features_combined_weighted = features_combined_weighted_review
 #COSINE SIMILARITY FOR COMPOSITE VECTOR
 
     cosine_sim_weighted_review = cosine_similarity(features_combined_weighted_review, features_combined_weighted_review)
@@ -242,11 +249,11 @@ def update_vector(relevant_artists=[], irrelevant_artists=[]):
     i = 0
     while temp_count < 10:
         a_name = updated_recommendations.index[i]
-        if a_name not in irrelevant_artists:
-            fin_list.append(a_name)
-            count += 1
-        else:
+        if a_name in irrelevant_artists or str(query_artist) in a_name:
             pass
+        else:
+            fin_list.append(a_name)
+            temp_count += 1
         i += 1
     # for i in updated_recommendations.index[1:11]:
     #     fin_list.append(i)
@@ -277,12 +284,12 @@ def normalize_feature_mat(features_mat):
 def json_search(query):
     global query_artist
     query_artist = query
+    # print(artist_set)
     if query in artist_set:
-        # print(query)
         _, tfidf_matrix = lyric_vectorization(artist_df, query)
         _, tfidf_matrix_title = song_name_vectorization(artist_df, query)
         _, tfidf_matrix_reviews = review_vectorization(artist_df, query)
-        cosine_sim_df_weighted = composite_vector (artist_df, tfidf_matrix, tfidf_matrix_title, tfidf_matrix_reviews)
+        cosine_sim_df_weighted = composite_vector(artist_df, tfidf_matrix, tfidf_matrix_title, tfidf_matrix_reviews)
         similar_artists_composite = cosine_sim_df_weighted[f'{str(query)}'].sort_values(ascending=False)
         # print(similar_artists_composite[1:])  # start from index 1 to skip artist himself       
         rankings = similar_artists_composite[1:]
@@ -304,11 +311,27 @@ def json_search(query):
         # print(rankings)
         res = []
         ranks = []
-        for r in rankings.keys()[:10]:
-            res.append([r, artist_to_image[r]])
-            ranks.append(rankings[r])
-        print("res:")
-        print(res)
+        t_count = 0
+        temp_i = 0
+        t_list =  list(rankings.keys())
+        print(type(temp_i))
+
+        while t_count < 10:
+            r = t_list[int(temp_i)]
+            if query_artist not in str(r):
+                try:
+                    res.append([r, artist_to_image[r]])
+                except:
+                    res.append([r, ""])
+                
+                ranks.append(rankings[r])
+                print("res:")
+                print(res)
+                t_count += 1
+            else:
+                pass
+            temp_i += 1
+            
         return json.dumps(res)
     else: 
         return json.dumps([])
@@ -351,7 +374,10 @@ def update_search():
     lst = update_vector(relevant_artists, irrelevant_artists)
 
     for artist in lst:
-        temp_lst.append([artist, artist_to_image[artist]])
+        try:
+            temp_lst.append([artist, artist_to_image[artist]])
+        except:
+            temp_lst.append([artist, ""])
             
     print("printing list:")
     print(temp_lst)

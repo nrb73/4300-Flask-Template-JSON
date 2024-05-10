@@ -29,10 +29,12 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 
 # artist_set = jsonpickle.decode(artist_json_obj)
 
-artist_df = pd.read_csv(r'C:\Users\15169\Documents\CS 4300\scooby_jukebox\4300-Flask-Template-JSON\backend\kaggle_data\new_data.csv')
-artist_df = artist_df.dropna()
+artist_df = pd.read_csv(r'C:\Users\15169\Documents\CS 4300\scooby_jukebox\4300-Flask-Template-JSON\backend\kaggle_data\final_artist_dataframe.csv')
+artist_df['Reviews'] = artist_df['Reviews'].fillna(value='')
+artist_df['song_titles'] = artist_df['song_titles'].fillna(value='')
+artist_df['average_score'] = artist_df['average_score'].fillna(value=0.0)
 
-lst = artist_df.loc[:, "artist"]
+lst = artist_df["artist"].tolist()
 artist_list = []
 for i in lst:
   artist_list.append(str(i))
@@ -328,11 +330,11 @@ for a in artist_list:
 
   artist_images.append((a, get_artist_image(curr_token, a_id)))
 
-# new_df = pd.DataFrame(artist_images, columns=['artist', 'image'])
-# print(new_df)
+new_df = pd.DataFrame(artist_images, columns=['artist', 'image'])
+print(new_df)
 
-# p = r"C:\Users\15169\Documents\CS 4300\scooby_jukebox\4300-Flask-Template-JSON\backend\spotify_api\database_jsons\artist_images_dataframes.json"
-# new_df.to_json(path_or_buf=p, orient='split')
+p = r"C:\Users\15169\Documents\CS 4300\scooby_jukebox\4300-Flask-Template-JSON\backend\spotify_api\database_jsons\artist_images_dataframes.json"
+new_df.to_json(path_or_buf=p, orient='split')
 
 # with open(r"C:\Users\15169\Documents\CS 4300\scooby_jukebox\4300-Flask-Template-JSON\backend\spotify_api\database_jsons\artist_images_dataframes.json", "w") as openfile:
 #   json.dump(new_df, openfile)
