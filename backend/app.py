@@ -70,9 +70,9 @@ features_combined_weighted = None
 query_artist = None
 
 artist_to_image = {}
-for pair in artist_images_json["data"]:
-    artist_name = pair[0]
-    artist_img = pair[1]
+for pair in artist_images_json:
+    artist_name = pair["artist"]
+    artist_img = pair["image"]
     artist_to_image[artist_name] = artist_img
     # except:
     #     artist_name = ""

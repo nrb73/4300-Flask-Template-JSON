@@ -227,11 +227,14 @@ def get_artist_image(token, a_id):
   query_url = f"https://api.spotify.com/v1/artists/{a_id}"
   headers = get_header(token)
   result = get(query_url, headers=headers)
-  json_result = json.loads(result.content)['images']
-  # print(json_result)
-  if len(json_result) == 0:
+  try:
+    json_result = json.loads(result.content)['images']
+    # print(json_result)
+    if len(json_result) == 0:
+      return ""
+    json_result = json_result[0]['url']
+  except:
     return ""
-  json_result = json_result[0]['url']
 
   return json_result
 
@@ -322,27 +325,25 @@ curr_token = get_token()
 artist_to_albums = {}
 artist_images = []
 
-for a in artist_list:
-  #returns dataframe of artist a's song by feature matrix
-  a_id = search_artist(curr_token, a)
-  # albums_temp = get_artist_albums(curr_token, a_id)
-  # artist_to_albums[a] = albums_temp
+# for a in artist_list:
+#   #returns dataframe of artist a's song by feature matrix
+#   a_id = search_artist(curr_token, a)
+#   # albums_temp = get_artist_albums(curr_token, a_id)
+#   # artist_to_albums[a] = albums_temp
 
-  artist_images.append((a, get_artist_image(curr_token, a_id)))
+#   artist_images.append((a, get_artist_image(curr_token, a_id)))
 
-new_df = pd.DataFrame(artist_images, columns=['artist', 'image'])
-print(new_df)
+# new_df = pd.DataFrame(artist_images, columns=['artist', 'image'])
+# print("pandas dataframe: ", new_df)
 
-p = r"C:\Users\15169\Documents\CS 4300\scooby_jukebox\4300-Flask-Template-JSON\backend\spotify_api\database_jsons\artist_images_dataframes.json"
-new_df.to_json(path_or_buf=p, orient='split')
+# p = r"C:\Users\15169\Documents\CS 4300\scooby_jukebox\4300-Flask-Template-JSON\backend\spotify_api\database_jsons\artist_images_dataframes.json"
+# new_df = new_df.to_json(orient="records")
+# print("converted dataframe: ", new_df)
 
-# with open(r"C:\Users\15169\Documents\CS 4300\scooby_jukebox\4300-Flask-Template-JSON\backend\spotify_api\database_jsons\artist_images_dataframes.json", "w") as openfile:
-#   json.dump(new_df, openfile)
+# with open(p, "w") as openfile:
+#   openfile.write(new_df)
 
 # reviews = get_artist_reviews(artist_to_albums)
-
-
-  
 
   # res = make_artist_track_matrix(artist_to_song_dict, song_to_artist_dict,song_id_to_name, a)
   # update_artist_songs(res)
