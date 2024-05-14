@@ -1,27 +1,85 @@
 <!doctype html>
-<title>{% block title %}{% endblock %} - Flaskr</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
-    rel="stylesheet">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+<head>
+    <title>{% block title %}{% endblock %} - Flaskr</title>
+    <meta property="og:title" content="Page1 - exported project" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta property="twitter:card" content="summary_large_image" />
+
+    <style data-tag="reset-style-sheet">
+      html {  line-height: 1.15;}body {  margin: 0;}* {  box-sizing: border-box;  border-width: 0;  border-style: solid;}p,li,ul,pre,div,h1,h2,h3,h4,h5,h6,figure,blockquote,figcaption {  margin: 0;  padding: 0;}button {  background-color: transparent;}button,input,optgroup,select,textarea {  font-family: inherit;  font-size: 100%;  line-height: 1.15;  margin: 0;}button,select {  text-transform: none;}button,[type="button"],[type="reset"],[type="submit"] {  -webkit-appearance: button;}button::-moz-focus-inner,[type="button"]::-moz-focus-inner,[type="reset"]::-moz-focus-inner,[type="submit"]::-moz-focus-inner {  border-style: none;  padding: 0;}button:-moz-focus,[type="button"]:-moz-focus,[type="reset"]:-moz-focus,[type="submit"]:-moz-focus {  outline: 1px dotted ButtonText;}a {  color: inherit;  text-decoration: inherit;}input {  padding: 2px 4px;}img {  display: block;}html { scroll-behavior: smooth  }
+    </style>
+    <style data-tag="default-style-sheet">
+      html {
+        font-family: Noto Sans;
+        font-size: 16px;
+      }
+
+      body {
+        font-weight: 400;
+        font-style:normal;
+        text-decoration: none;
+        text-transform: none;
+        letter-spacing: normal;
+        line-height: 1.15;
+        color: var(--dl-color-theme-neutral-dark);
+        background-color: var(--dl-color-theme-neutral-light);
+
+        fill: var(--dl-color-theme-neutral-dark);
+      }
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />    
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/animate.css@4.1.1/animate.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <links
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@teleporthq/teleport-custom-scripts/dist/style.css"
+    />
+  </head>
 
 <body>
-    <div class="full-body-container">
-        <img class="artist" src="../static/images/artist.png" />
-        <div class="top-text">
-            <div>
-                <h1 id="google-4">Search Artist</h1>
-            </div>
-            <div class="input-box" onclick="sendFocus()">
-                <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                <input placeholder="Search for an artist" id="filter-text-val" onkeyup="filterText()"
-                    list="big_artists">
-                <datalist id="big_artists">
-                    <option value=" (Moonshine)"></option>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <div>
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}" />
+
+        <div class="page1-container">
+            <div class="page1-container1">
+                <div class="input-box" onclick="sendFocus()" onkeyup="">
+                    <input 
+                    placeholder="Search for an artist" 
+                    id="filter-text-val" 
+                    
+                    class="page1-textinput input"
+                        list="big_artists">
+                    <datalist id="big_artists">
+                        <option value=" (Moonshine)"></option>
                     <option value="'Jesus Christ.' (the indie band)"></option>
                     <option value="'Weird Al' Yankovic"></option>
                     <option value="10 K.A.N.'s"></option>
@@ -40,7 +98,7 @@
                     <option value="24/7"></option>
                     <option value="2Mex"></option>
                     <option value="2Pac"></option>
-                    <option value="2Pac & Outlawz"></option>
+
                     <option value="2Phace"></option>
                     <option value="2nd II None"></option>
                     <option value="3 Melancholy Gypsys"></option>
@@ -67,12 +125,12 @@
                     <option value="5th Ward Weebie"></option>
                     <option value="60 Second Assassin"></option>
                     <option value="69 Boyz"></option>
-                    <option value="7L & Esoteric"></option>
+                    
                     <option value="816 Boyz"></option>
                     <option value="88 Camino"></option>
                     <option value="88-Keys"></option>
                     <option value="8Ball"></option>
-                    <option value="8Ball & MJG"></option>
+
                     <option value="95 South"></option>
                     <option value="9th Prince"></option>
                     <option value="9th Wonder"></option>
@@ -102,14 +160,12 @@
                     <option value="AcHoZeN"></option>
                     <option value="Ace Hood"></option>
                     <option value="Aceyalone"></option>
-                    <option value="Aceyalone & Mumbles"></option>
+
                     <option value="Adam F"></option>
                     <option value="Adam WarRock"></option>
                     <option value="Adeem"></option>
                     <option value="Aesop Rock"></option>
                     <option value="Afrika Bambaataa"></option>
-                    <option value="Afrika Bambaataa & Soulsonic Force"></option>
-                    <option value="Afrika Bambaataa & The Jazzy 5"></option>
                     <option value="Afroman"></option>
                     <option value="Afu-Ra"></option>
                     <option value="Agerman"></option>
@@ -133,7 +189,7 @@
                     <option value="Alexipharmic"></option>
                     <option value="Algorithm (US)"></option>
                     <option value="Ali 'Dee' Theodore"></option>
-                    <option value="Ali & Gipp"></option>
+        
                     <option value="Ali (CHE)"></option>
                     <option value="Ali Jones"></option>
                     <option value="Ali Vegas"></option>
@@ -150,7 +206,7 @@
                     <option value="Almighty (Group)"></option>
                     <option value="Almyghty Myghty Pythons"></option>
                     <option value="Alpa Chino"></option>
-                    <option value="Alyssa Marie & ENVY"></option>
+        
                     <option value="Ambassador"></option>
                     <option value="Ambokire Junior Salimu"></option>
                     <option value="American Cream Team"></option>
@@ -164,7 +220,7 @@
                     <option value="Ancient Coins"></option>
                     <option value="Andr 3000"></option>
                     <option value="Andre Nickatina"></option>
-                    <option value="Andre Nickatina & Equipto"></option>
+
                     <option value="Andre the Giant"></option>
                     <option value="Andrew Marvell"></option>
                     <option value="Angie Martinez"></option>
@@ -183,7 +239,7 @@
                     <option value="Apache"></option>
                     <option value="Apani B Fly"></option>
                     <option value="Apathy"></option>
-                    <option value="Apathy & Celph Titled"></option>
+
                     <option value="Apoccalips"></option>
                     <option value="Apollo Brown"></option>
                     <option value="Arabesque"></option>
@@ -219,7 +275,7 @@
                     <option value="Audio Push"></option>
                     <option value="Audio Two"></option>
                     <option value="Avril Lavigne"></option>
-                    <option value="Awol One & Daddy Kev"></option>
+            
                     <option value="Awol One and Mike Nardone"></option>
                     <option value="Axe Murder Boyz"></option>
                     <option value="Ayentee"></option>
@@ -230,7 +286,7 @@
                     <option value="B.B. Jay"></option>
                     <option value="B.B. King"></option>
                     <option value="B.G."></option>
-                    <option value="B.G. Knocc Out & Dresta"></option>
+            
                     <option value="B.J. Thomas"></option>
                     <option value="B.o.B"></option>
                     <option value="BBU"></option>
@@ -261,7 +317,7 @@
                     <option value="Bavu Blakes"></option>
                     <option value="BeYoOwnBoss"></option>
                     <option value="Beanie Sigel"></option>
-                    <option value="Beanie Sigel & Freeway"></option>
+                
                     <option value="Beastie Boys"></option>
                     <option value="Beck"></option>
                     <option value="Bee Gees"></option>
@@ -278,7 +334,7 @@
                     <option value="Benzino"></option>
                     <option value="Beyonc"></option>
                     <option value="Bias B"></option>
-                    <option value="Big B & The Felons Club"></option>
+                   
                     <option value="Big Black Lincoln"></option>
                     <option value="Big Boi"></option>
                     <option value="Big Daddy Kane"></option>
@@ -315,14 +371,14 @@
                     <option value="Binary Star"></option>
                     <option value="Bing Cypher"></option>
                     <option value="Birdman"></option>
-                    <option value="Birdman & Lil Wayne"></option>
+                  
                     <option value="Birmingham J"></option>
                     <option value="Bishop"></option>
                     <option value="Bishop Lamont"></option>
                     <option value="Biz Markie"></option>
-                    <option value="Biz Markie & Elephant Man"></option>
+   
                     <option value="Bizarre"></option>
-                    <option value="Bizarre & Kuniva"></option>
+         
                     <option value="Bizzy Bone"></option>
                     <option value="Blaackbottom"></option>
                     <option value="Blac Haze"></option>
@@ -331,7 +387,7 @@
                     <option value="Black Market Militia"></option>
                     <option value="Black Menace"></option>
                     <option value="Black Milk"></option>
-                    <option value="Black Milk & Danny Brown"></option>
+
                     <option value="Black Moon"></option>
                     <option value="Black Rob"></option>
                     <option value="Black Sabbath"></option>
@@ -348,9 +404,9 @@
                     <option value="Blockhead"></option>
                     <option value="Bloodhound Gang"></option>
                     <option value="Bloods"></option>
-                    <option value="Bloods & Crips"></option>
+
                     <option value="Blu"></option>
-                    <option value="Blu & Exile"></option>
+
                     <option value="Blue Scholars"></option>
                     <option value="Blueprint"></option>
                     <option value="Blur"></option>
@@ -358,7 +414,7 @@
                     <option value="Bo$$"></option>
                     <option value="Bob Dylan"></option>
                     <option value="Bob Marley"></option>
-                    <option value="Bob Marley & The Wailers"></option>
+
                     <option value="Bobby Brackins"></option>
                     <option value="Bobby Brillo"></option>
                     <option value="Bobby Fischer (Rapper)"></option>
@@ -405,9 +461,9 @@
                     <option value="Caleze Jonez"></option>
                     <option value="Cali Swag District"></option>
                     <option value="Calm"></option>
-                    <option value="Caltroit (Black Milk & Bishop Lamont)"></option>
+ 
                     <option value="Cam'ron"></option>
-                    <option value="Cam'ron & Vado"></option>
+
                     <option value="Cane"></option>
                     <option value="Canibus"></option>
                     <option value="Cannibal Ox"></option>
@@ -421,13 +477,13 @@
                     <option value="Cella Dwellas"></option>
                     <option value="Celly Cel"></option>
                     <option value="Celph Titled"></option>
-                    <option value="Celph Titled & Buckwild"></option>
+            
                     <option value="Centa of Da Web"></option>
                     <option value="Cesar Comanche"></option>
                     <option value="Chamillionaire"></option>
-                    <option value="Charizma & Peanut Butter Wolf"></option>
+   
                     <option value="Charles Hamilton"></option>
-                    <option value="Chase & Status"></option>
+       
                     <option value="Chet Hanx"></option>
                     <option value="Chicago Bears Shufflin' Crew"></option>
                     <option value="Chiddy Bang"></option>
@@ -440,7 +496,7 @@
                     <option value="Chip"></option>
                     <option value="Chop"></option>
                     <option value="Chris Brown"></option>
-                    <option value="Chris Brown & Tyga"></option>
+   
                     <option value="Chris Webby"></option>
                     <option value="Christian Kuehl"></option>
                     <option value="Chubb Rock"></option>
@@ -484,15 +540,14 @@
                     <option value="DJ Drama"></option>
                     <option value="DJ Ill Will"></option>
                     <option value="DJ Jazzy Jeff"></option>
-                    <option value="DJ Jazzy Jeff & The Fresh Prince"></option>
+          
                     <option value="DJ Jimi"></option>
                     <option value="DJ Kay Slay"></option>
                     <option value="DJ Khaled"></option>
                     <option value="DJ Mister Cee"></option>
-                    <option value="DJ Muggs & GZA The Genius"></option>
-                    <option value="DJ Muggs & Sick Jacken"></option>
+
                     <option value="DJ Quik"></option>
-                    <option value="DJ Unknown & DJ Mekalek"></option>
+          
                     <option value="DJ Whoo Kid"></option>
                     <option value="DMX"></option>
                     <option value="DOM KENNEDY"></option>
@@ -540,12 +595,12 @@
                     <option value="Donnis"></option>
                     <option value="Doris Day"></option>
                     <option value="Dorrough Music"></option>
-                    <option value="Doug E. Fresh & The Get Fresh Crew"></option>
+       
                     <option value="Dr. Dre"></option>
-                    <option value="Dr. Jeckyll & Mr. Hyde"></option>
+        
                     <option value="Dr. Octagon"></option>
                     <option value="Drake"></option>
-                    <option value="Drake, Kanye West, Lil Wayne & Eminem"></option>
+
                     <option value="Drastic"></option>
                     <option value="Dru Down"></option>
                     <option value="Dubee"></option>
@@ -562,7 +617,6 @@
                     <option value="EarlWolf"></option>
                     <option value="Eazy-E"></option>
                     <option value="Edan"></option>
-                    <option value="Eddie Ill & D.L."></option>
                     <option value="Edward Maya"></option>
                     <option value="El-P"></option>
                     <option value="Eli Porter"></option>
@@ -571,14 +625,10 @@
                     <option value="Emilio Rojas"></option>
                     <option value="Emily Dickinson"></option>
                     <option value="Eminem"></option>
-                    <option value="Eminem & Redman"></option>
-                    <option value="Eminem & Steve Berman"></option>
-                    <option value="Eminem & Sway & King Tech"></option>
                     <option value="Eminem, 50 Cent, and Busta Rhymes"></option>
                     <option value="Emmanuel Jal"></option>
                     <option value="Enur"></option>
                     <option value="Equipto"></option>
-                    <option value="Eric B. & Rakim"></option>
                     <option value="Erin Christine"></option>
                     <option value="Erykah Badu"></option>
                     <option value="Esau"></option>
@@ -591,7 +641,6 @@
                     <option value="Exile"></option>
                     <option value="Exzactly"></option>
                     <option value="Eyedea"></option>
-                    <option value="Eyedea & Abilities"></option>
                     <option value="F.L.Y. (Fast Life Yungstaz)"></option>
                     <option value="Fabolous"></option>
                     <option value="Fam-Lay"></option>
@@ -616,7 +665,6 @@
                     <option value="Flobots"></option>
                     <option value="Foesum"></option>
                     <option value="Fort Minor"></option>
-                    <option value="Fort Minor & Styles of Beyond"></option>
                     <option value="Fortune Family"></option>
                     <option value="Foster the People"></option>
                     <option value="Foxy Brown"></option>
@@ -632,8 +680,6 @@
                     <option value="Freeway"></option>
                     <option value="French Montana"></option>
                     <option value="Fugees"></option>
-                    <option value="Funkmaster Flex"></option>
-                    <option value="Funkmaster Flex & Big Kap"></option>
                     <option value="G-Unit"></option>
                     <option value="GZA"></option>
                     <option value="Gang Starr"></option>
@@ -660,14 +706,11 @@
                     <option value="Governor"></option>
                     <option value="Grafh"></option>
                     <option value="Grand Daddy I.U."></option>
-                    <option value="Grandmaster Flash & The Furious Five"></option>
                     <option value="Grandmaster Melle Mel"></option>
                     <option value="Gravediggaz"></option>
                     <option value="Greedy Fingers"></option>
                     <option value="Green Day"></option>
                     <option value="Greenhouse"></option>
-                    <option value="Greg Nice"></option>
-                    <option value="Gregory D & DJ Mannie Fresh"></option>
                     <option value="Grieves"></option>
                     <option value="Grill"></option>
                     <option value="Grimm"></option>
@@ -727,14 +770,13 @@
                     <option value="J-Twizzle"></option>
                     <option value="J-Yak"></option>
                     <option value="J. Cole"></option>
-                    <option value="J. Cole & Kendrick Lamar"></option>
+
                     <option value="J. Holiday"></option>
                     <option value="J.J. Brown"></option>
                     <option value="J.R. Writer"></option>
                     <option value="J3"></option>
                     <option value="JAY-Z"></option>
-                    <option value="JAY-Z & Kanye West"></option>
-                    <option value="JAY-Z & T.I."></option>
+
                     <option value="JJ Demon"></option>
                     <option value="JT Money"></option>
                     <option value="JT0"></option>
@@ -773,12 +815,10 @@
                     <option value="Joell Ortiz"></option>
                     <option value="Joey Spectakular"></option>
                     <option value="John Berryman"></option>
-                    <option value="John Cena & Tha Trademarc"></option>
                     <option value="John Denver"></option>
                     <option value="John Groves"></option>
                     <option value="John Holt"></option>
                     <option value="John Legend"></option>
-                    <option value="John Legend & The Roots"></option>
                     <option value="Johnny Cash"></option>
                     <option value="Johnny Givens"></option>
                     <option value="Johnny Polygon"></option>
@@ -845,7 +885,6 @@
                     <option value="Kno"></option>
                     <option value="Koncise"></option>
                     <option value="Kool G Rap"></option>
-                    <option value="Kool G. Rap & DJ Polo"></option>
                     <option value="Kool Moe Dee"></option>
                     <option value="Krizz Kaliko"></option>
                     <option value="Kuniva"></option>
@@ -876,16 +915,15 @@
                     <option value="Lil B"></option>
                     <option value="Lil Chuckee"></option>
                     <option value="Lil Cuete"></option>
-                    <option value="Lil Fame & Termanology"></option>
+    
                     <option value="Lil Flip"></option>
                     <option value="Lil Jon"></option>
-                    <option value="Lil Jon & The East Side Boyz"></option>
+
                     <option value="Lil Keke"></option>
                     <option value="Lil Romeo"></option>
                     <option value="Lil Scrappy"></option>
                     <option value="Lil Twist"></option>
                     <option value="Lil Wayne"></option>
-                    <option value="Lil Wayne & Juelz Santana"></option>
                     <option value="Lil' Kim"></option>
                     <option value="Lil' Troy"></option>
                     <option value="Linkin Park"></option>
@@ -899,7 +937,6 @@
                     <option value="Lowkey"></option>
                     <option value="Lucid Dreams"></option>
                     <option value="Ludacris"></option>
-                    <option value="Ludacris & Shawnna"></option>
                     <option value="Ludwig van Beethoven"></option>
                     <option value="Luke"></option>
                     <option value="Luniz"></option>
@@ -908,7 +945,6 @@
                     <option value="Lyn Collins"></option>
                     <option value="Lynyrd Skynyrd"></option>
                     <option value="Lyrics Born"></option>
-                    <option value="M-Trey & CJ The Genesis"></option>
                     <option value="M.C. Lida"></option>
                     <option value="M.I.A."></option>
                     <option value="M.I.M.S"></option>
@@ -936,7 +972,6 @@
                     <option value="Mac Miller"></option>
                     <option value="Machine Gun Kelly"></option>
                     <option value="Macklemore"></option>
-                    <option value="Macklemore & Ryan Lewis"></option>
                     <option value="Made Men"></option>
                     <option value="Madonna"></option>
                     <option value="Madvillain"></option>
@@ -959,7 +994,6 @@
                     <option value="Masta Killa"></option>
                     <option value="Master P"></option>
                     <option value="Matisyahu"></option>
-                    <option value="Matrix & A-Butta"></option>
                     <option value="Mavis Staples"></option>
                     <option value="Meek Mill"></option>
                     <option value="Mel-Man"></option>
@@ -969,7 +1003,7 @@
                     <option value="Memphis Bleek"></option>
                     <option value="Meth  Ghost  Rae"></option>
                     <option value="Method Man"></option>
-                    <option value="Method Man & Redman"></option>
+
                     <option value="Metta Sandiford-Artest"></option>
                     <option value="Mia X"></option>
                     <option value="Michael Jackson"></option>
@@ -1006,7 +1040,7 @@
                     <option value="Mr. Mike"></option>
                     <option value="Mr. Pookie"></option>
                     <option value="Mr. SOS"></option>
-                    <option value="Mumford & Sons"></option>
+
                     <option value="Murphy Lee"></option>
                     <option value="Murs"></option>
                     <option value="Mystery"></option>
@@ -1022,7 +1056,6 @@
                     <option value="Narcy"></option>
                     <option value="Nardo (USA)"></option>
                     <option value="Nas"></option>
-                    <option value="Nas & Damian Marley"></option>
                     <option value="Nashawn"></option>
                     <option value="Nate Dogg"></option>
                     <option value="Naughty By Nature"></option>
@@ -1039,7 +1072,6 @@
                     <option value="Next"></option>
                     <option value="Nick Cannon"></option>
                     <option value="Nicki Minaj"></option>
-                    <option value="Nicki Minaj & will.i.am"></option>
                     <option value="Nikki Giovanni"></option>
                     <option value="Nipsey Hussle"></option>
                     <option value="Non-Prophets"></option>
@@ -1053,7 +1085,6 @@
                     <option value="OG Style"></option>
                     <option value="OJ da Juiceman"></option>
                     <option value="Obie Trice"></option>
-                    <option value="Obie Trice, 50 Cent & Eminem"></option>
                     <option value="Odd Future"></option>
                     <option value="Ol' Dirty Bastard"></option>
                     <option value="OldWorlDisorder"></option>
@@ -1063,7 +1094,7 @@
                     <option value="One Be Lo"></option>
                     <option value="OneRepublic"></option>
                     <option value="Organized Konfusion"></option>
-                    <option value="Oschino & Sparks"></option>
+
                     <option value="OutKast"></option>
                     <option value="Outasight"></option>
                     <option value="Outerspace"></option>
@@ -1083,7 +1114,7 @@
                     <option value="Peanut Butter Wolf"></option>
                     <option value="People Under the Stairs"></option>
                     <option value="Pete Rock"></option>
-                    <option value="Pete Rock & C.L. Smooth"></option>
+     
                     <option value="Peter Tosh"></option>
                     <option value="Petey Pablo"></option>
                     <option value="Pharoahe Monch"></option>
@@ -1113,7 +1144,7 @@
                     <option value="Psycho Realm"></option>
                     <option value="Public Enemy"></option>
                     <option value="Pudgee tha Phat Bastard"></option>
-                    <option value="Puff Daddy & the Family"></option>
+
                     <option value="Purple Ribbon All Stars"></option>
                     <option value="Push Button Objects"></option>
                     <option value="Pusha T"></option>
@@ -1159,7 +1190,6 @@
                     <option value="Rihanna"></option>
                     <option value="Ro Spit"></option>
                     <option value="Roach Gigz"></option>
-                    <option value="Rob Base & DJ E-Z Rock"></option>
                     <option value="Robbie Williams"></option>
                     <option value="Robert Frost"></option>
                     <option value="Robert Hass"></option>
@@ -1170,7 +1200,7 @@
                     <option value="Romyo"></option>
                     <option value="Roots Manuva"></option>
                     <option value="Roscoe Dash"></option>
-                    <option value="Royce da 5'9""></option>
+                    <option value="Royce da 5'9"></option>
                     <option value=" Rubberbandits"></option>
                     <option value="Rucka Rucka Ali"></option>
                     <option value="Ruff Ryders"></option>
@@ -1192,25 +1222,21 @@
                     <option value="Sandpeople"></option>
                     <option value="Saul Williams"></option>
                     <option value="Savage (Rap)"></option>
-                    <option value="Sayitainttone & Earlly Mac"></option>
                     <option value="Scarface"></option>
                     <option value="Scooter Smiff"></option>
                     <option value="Scotty ATL"></option>
                     <option value="Scribe"></option>
                     <option value="Sean Garrett"></option>
                     <option value="Sean Kingston"></option>
-                    <option value="Sean Kingston & Justin Bieber"></option>
                     <option value="Sean Price"></option>
                     <option value="Sene"></option>
                     <option value="Seventh Floor Crew"></option>
-                    <option value="Shabaam Sahdeeq, King Skam, Kwest Tha Madd Lad, A.L. & Eminem"></option>
                     <option value="Shad"></option>
                     <option value="Shakira"></option>
                     <option value="Shaquille O'Neal"></option>
                     <option value="Shawty Lo"></option>
                     <option value="Sheek Louch"></option>
                     <option value="Shop Boyz"></option>
-                    <option value="Showbiz & A.G."></option>
                     <option value="Shuffle T"></option>
                     <option value="Shwayze"></option>
                     <option value="Shyheim"></option>
@@ -1233,10 +1259,8 @@
                     <option value="Slum Village"></option>
                     <option value="Smash Mouth"></option>
                     <option value="Smoke DZA"></option>
-                    <option value="Smokey Robinson & The Miracles"></option>
                     <option value="Snibunny"></option>
                     <option value="Snoop Dogg"></option>
-                    <option value="Snoop Dogg & Wiz Khalifa"></option>
                     <option value="Snow"></option>
                     <option value="Snowgoons"></option>
                     <option value="Solomon Ray"></option>
@@ -1272,7 +1296,6 @@
                     <option value="Supernatural"></option>
                     <option value="Surf Club"></option>
                     <option value="Sway"></option>
-                    <option value="Sway & King Tech"></option>
                     <option value="Swedish House Mafia"></option>
                     <option value="Swizz Beatz"></option>
                     <option value="T-Pain"></option>
@@ -1293,7 +1316,6 @@
                     <option value="Terror Squad"></option>
                     <option value="TesMoney"></option>
                     <option value="Tha Alkaholiks"></option>
-                    <option value="Tha Alkaholiks & Sugar Ray"></option>
                     <option value="Tha Dogg Pound"></option>
                     <option value="Tha Joker (USA)"></option>
                     <option value="The 7A3"></option>
@@ -1318,10 +1340,8 @@
                     <option value="The Double G (Rap)"></option>
                     <option value="The Firm"></option>
                     <option value="The Game"></option>
-                    <option value="The Game & Lil Wayne"></option>
                     <option value="The Gregory Brothers"></option>
                     <option value="The Grouch"></option>
-                    <option value="The High & Mighty"></option>
                     <option value="The Jimi Hendrix Experience"></option>
                     <option value="The Killers"></option>
                     <option value="The Kings Dead"></option>
@@ -1362,13 +1382,10 @@
                     <option value="Tim Chantarangsu"></option>
                     <option value="Tim Dog"></option>
                     <option value="Timbaland"></option>
-                    <option value="Timbaland & Magoo"></option>
                     <option value="Tinchy Stryder"></option>
                     <option value="Tinie Tempah"></option>
                     <option value="Toby Keith"></option>
-                    <option value="Tom Scott & Chris Marco"></option>
                     <option value="Tom Tom Club"></option>
-                    <option value="Tommy C. & J. Reyez"></option>
                     <option value="Tonedeff"></option>
                     <option value="Tony Talk"></option>
                     <option value="Tony Touch"></option>
@@ -1429,7 +1446,6 @@
                     <option value="William Butler Yeats"></option>
                     <option value="William Shakespeare"></option>
                     <option value="Wiz Khalifa"></option>
-                    <option value="Wiz Khalifa & Curren$y"></option>
                     <option value="Wooh da Kid"></option>
                     <option value="Wretch 32"></option>
                     <option value="Wu-Tang Clan"></option>
@@ -1445,7 +1461,6 @@
                     <option value="Yelawolf"></option>
                     <option value="Ying Yang Twins"></option>
                     <option value="Yo Gotti"></option>
-                    <option value="You Me At Six & Chiddy Bang"></option>
                     <option value="Young Abysinnia"></option>
                     <option value="Young Ace"></option>
                     <option value="Young Buck"></option>
@@ -1461,7 +1476,6 @@
                     <option value="Yung Joc"></option>
                     <option value="Yung MillzZ"></option>
                     <option value="Z-Ro"></option>
-                    <option value="Zeph & Azeem"></option>
                     <option value="Zero 7"></option>
                     <option value="Zion I"></option>
                     <option value="brandUn DeShay"></option>
@@ -1470,29 +1484,68 @@
                     <option value="dead prez"></option>
                     <option value="eLZhi"></option>
                     <option value="k-os"></option>
-                    <datalist>
-
+                        <datalist>
+                </div>
             </div>
+            <div class="page1-main-body-container">
+                <div class="page1-left-column">
+                    <div id="answer-box" onclick="feedback()" style="width: 100%;"></div>
+                </div>
+            
         </div>
-        <div id="answer-box" onclick="feedback()">
-            <!-- <span class="material-symbols-outlined" onclick="updateList()">update</span> -->
-        </div>
+
+        <!-- <div class="container contant">
+            
+            <div class="first_column">
+                <div class="col-5">
+                     <div id="answer-box" onclick="feedback()"></div>
+                </div>
+            </div>
+            <div class="second_column">
+                <div class="col-3">
+                    <div style="width: 200x;"><canvas id="acquisitions"></canvas></div>
+                    <script type="module" src="src/acquisitions.js"></script>
+                </div>
+             </div>
+            
+        </div> -->
+
+        
     </div>
 
     <script>
+
+        var textBox = document.getElementById("filter-text-val")
+
+        textBox.addEventListener("keydown", function (event) { 
+            if (event.keyCode == 13) { 
+                filterText(); 
+            } 
+        }); 
+
+
         function updateButtonTemplate() {
             return `<span class="material-symbols-outlined" onclick="updateList()">update</span>`
         }
 
-        function answerBoxTemplate(title, titleDesc = "", rating = "", image = "", listens = "", reviews = "") {
-            return `<div class='artist-box' data-artist-id=${title}>
-                <h3 class='song-name'>Artist Name: ${title}</h3>
-                <p class='artist-name'>Top songs: ${titleDesc}</p>
-                <p class='song-rating'>Artist Similarity Rating: ${rating}</p>
-                <p class='monthly-listens'>Monthly Listens: ${listens}</p>
-                <p class='reviews'>Reviews: ${reviews}</p>
-                <img class='artist-images' src=${image} alt="Artist image">
-                <div class='ratings-container'>
+        function answerBoxTemplate(title, titleDesc = "", rating = "", image = "", graph_1, lyric_score, overall_score) {
+            return `<div class="page1-artist-object">
+              <div class="page1-artist-name">
+                <span class="page1-text">${title}</span>
+              </div>
+              <div class="page1-artist-components">
+                <div class="page1-artist-image">
+                    <img src="${image}" class="page1-artist-image"/>
+                    </div>
+                <div class="page1-artist-total">
+                    <span class="page1-text_2">lyrical Similarity</span>
+                    <span class="page1-text">${lyric_score}%</span>
+                    </div>
+                <div class="page1-artist-total">
+                    <span class="page1-text_2">Overall Similarity</span>
+                    <span class="page1-text">${overall_score}%</span>
+                    </div>
+                <div class="ratings-container">
                     <div class='rating'>
                         <span class="rating-button material-icons">thumb_up</span>
                         <span class="rating-count">0</span>
@@ -1502,7 +1555,21 @@
                         <span class="rating-count">0</span>
                     </div>
                 </div>
+              </div>
             </div>`
+        }
+
+        function RadarChartTemplate() {
+
+            fetch("/query_artist?" + new URLSearchParams(({ json: document.getElementById("answer-box").innerHTML })))
+                .then((response) => response.json())
+                .then((data) => data.forEach(row => {
+                    artist_name = row[0]
+                    artist_image = row[1]
+                    let tempDiv = document.createElement("div")
+                    tempDiv.innerHTML = answerBoxTemplate(artist_name, titleDesc = "", rating = "", image = artist_image)
+                    document.getElementById("answer-box").appendChild(tempDiv)
+                }));
         }
 
         function sendFocus() {
@@ -1521,15 +1588,17 @@
                 .then((data) => data.forEach(row => {
                     artist_name = row[0]
                     artist_image = row[1]
+                    graph_1 = row[2]
+                    lyric_score = row[3]
+                    overall_score = row[4]
                     let tempDiv = document.createElement("div")
-                    tempDiv.innerHTML = answerBoxTemplate(artist_name, titleDesc = "", rating = "", image = artist_image)
+                    tempDiv.innerHTML = answerBoxTemplate(artist_name, titleDesc = "", rating = "", image = artist_image, graph_1, lyric_score, overall_score)
                     document.getElementById("answer-box").appendChild(tempDiv)
                 }));
-
         }
 
         function feedback() {
-            document.querySelectorAll(".artist-box").forEach(box => {
+            document.querySelectorAll(".ratings-container").forEach(box => {
                 const artistId = box.dataset.artistId
                 const ratings = box.querySelectorAll(".rating");
                 const likeRating = ratings[0];
@@ -1578,8 +1647,11 @@
                     .then((data) => data.forEach(row => {
                         artist_name = row[0]
                         artist_image = row[1]
+                        graph_1 = row[2]
+                        lyric_score = row[3]
+                        overall_score = row[4]
                         let tempDiv = document.createElement("div")
-                        tempDiv.innerHTML = answerBoxTemplate(artist_name, titleDesc = "", rating = "", image = artist_image)
+                        tempDiv.innerHTML = answerBoxTemplate(artist_name, titleDesc = "", rating = "", image = artist_image, graph_1, lyric_score, overall_score)
                         document.getElementById("answer-box").appendChild(tempDiv)
                     }));
                 // const response = await fetch(`/artists/${artistId}/${likeOrDislike}`);

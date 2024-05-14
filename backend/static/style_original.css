@@ -1,0 +1,176 @@
+.full-body-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-direction: column;
+}
+
+#google-c {
+    color: #4285F4;
+}
+
+#google-s {
+    color: #DB4437;
+}
+
+#google-4 {
+    color: #F4B400;
+    margin-top: 0;
+    padding-top: 40px;
+}
+
+#google-3 {
+    color: #4285F4;
+}
+
+#google-0-1 {
+    color: #0F9D58;
+}
+
+#google-0-2 {
+    color: #DB4437;
+}
+
+.google-colors {
+    display: flex;
+    align-items: center;
+    font-size: 48px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.google-colors h1 {
+    margin-bottom: 0;
+    margin-right: 3px;
+}
+
+.input-box {
+    border-radius: 50px;
+    border: 1px solid black;
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    padding: 12px;
+    width: 600px;
+    background-color: white;
+}
+
+.input-box img {
+    height: 20px;
+    width: 20px;
+}
+
+.top-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.input-box input {
+    width: 100%;
+    margin-left: 10px;
+    font-size: 16px;
+    border: none;
+    outline: 0;
+}
+
+#answer-box {
+    width: 700px;
+    margin-top: 50px;
+}
+
+.episode-title {
+    font-family: 'Kanit', sans-serif;
+}
+
+.episode-desc {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.ratings-container {
+    display: flex;
+    padding-top: 33px;
+    padding-left: 0;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    cursor: default;
+}
+
+.rating:not(:last-child) {
+    margin-right: 12px;
+}
+
+.rating-selected .rating-button {
+    color: #009578;
+}
+
+.rating-selected .rating-count {
+    color: #009578;
+}
+
+.rating-button {
+    margin-right: 6px;
+    cursor: pointer;
+    color: #555555;
+}
+
+.rating:not(.rating-selected)>.rating-button:hover {
+    color: #ffffff;
+}
+
+
+.material-symbols-outlined {
+    color: #555555;
+    cursor: pointer;
+    font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+}
+
+.material-symbols-outlined:hover {
+    color: #000000;
+}
+
+.artist-box {
+    margin-top: 50px;
+    height: 270px;
+    /* border: 2px solid green; */
+    position: relative;
+
+}
+
+.artist-images {
+    position: absolute;
+    top: 0;
+    right: 0px;
+    margin-top: 1em;
+    max-height: 240px;
+    max-width: 400px;
+    float: right;
+}
+
+.top-text {
+    padding-bottom: 60px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background-color: #009578;
+}
+
+.artist {
+    position: absolute;
+    max-width: 30%;
+    max-height: 30%;
+    left: 8.5%;
+}

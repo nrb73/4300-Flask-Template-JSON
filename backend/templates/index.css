@@ -1,0 +1,40 @@
+.page-container {
+  width: 100%;
+  display: flex;
+  overflow: auto;
+  min-height: 100vh;
+  align-items: center;
+  border-color: var(--dl-color-theme-neutral-dark);
+  border-width: 1px;
+  flex-direction: column;
+  background-size: cover;
+  background-image: url("public/tq_bdtlei97xb-ide-1500w.png");
+  background-position: center;
+}
+.page-container1 {
+  width: 100%;
+  height: 193px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.page-textinput {
+  color: #ef5558;
+  width: 600px;
+  height: 40%;
+  padding: 0px;
+  z-index: 100;
+  box-shadow: 5px 5px 10px 0px rgba(220, 140, 220, 0.41);
+  text-align: center;
+  border-color: #f17c7e;
+  border-width: 5px;
+  border-radius: var(--dl-radius-radius-buttonradius);
+  background-color: var(--dl-color-theme-neutral-light);
+}
+.page-container2 {
+  width: 962px;
+  border: 2px dashed rgba(120, 120, 120, 0.4);
+  height: 806px;
+  display: flex;
+  align-items: flex-start;
+}

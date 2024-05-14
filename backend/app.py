@@ -14,8 +14,13 @@ import html_to_json
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-nltk.download('stopwords')
-nltk.download('wordnet')
+from bs4 import BeautifulSoup
+import scipy.sparse
+import html.parser
+import plotly.express as px
+import plotly
+# nltk.download('stopwords')
+# nltk.download('wordnet')
 
 # ROOT_PATH for linking with all your files. 
 # Feel free to use a config.py or settings.py with a global export variable
@@ -23,6 +28,27 @@ os.environ['ROOT_PATH'] = os.path.abspath(os.path.join("..",os.curdir))
 
 # Get the directory of the current script
 current_directory = os.path.dirname(os.path.abspath(__file__))
+
+artist_df = pd.read_csv(current_directory + '/kaggle_data/final_artist_dataframe.csv')
+artist_df['Reviews'] = artist_df['Reviews'].fillna(value='')
+artist_df['song_titles'] = artist_df['song_titles'].fillna(value='')
+artist_df['average_score'] = artist_df['average_score'].fillna(value=0.0)
+
+with open(current_directory + '/spotify_api/database_jsons/artist_images_dataframes.json', "r") as openfile: 
+  artist_images_json = json.load(openfile)
+
+save_path_1 = current_directory + '/kaggle_data/tfidf_matrix_lyrics.npz'
+save_path_2 = current_directory + '/kaggle_data/tfidf_matrix_titles.npz'
+save_path_3 = current_directory + '/kaggle_data/tfidf_matrix_reviews.npz'
+
+tfidf_matrix_lyrics = scipy.sparse.load_npz(save_path_1)
+
+tfidf_matrix_title = scipy.sparse.load_npz(save_path_2)
+
+tfidf_matrix_reviews = scipy.sparse.load_npz(save_path_3)
+
+cosine_sim_lyrics = cosine_similarity(tfidf_matrix_lyrics, tfidf_matrix_lyrics)
+cosine_sim_lyrics_df = pd.DataFrame(cosine_sim_lyrics, index=artist_df['artist'], columns=artist_df['artist'])
 
 # Specify the path to the JSON file relative to the current script
 
@@ -43,13 +69,7 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 # #retrieve set of artists in the database
 # small_songs_list = small_songs_df.index.tolist()
 
-artist_df = pd.read_csv(current_directory + r'\kaggle_data\final_artist_dataframe.csv')
-artist_df['Reviews'] = artist_df['Reviews'].fillna(value='')
-artist_df['song_titles'] = artist_df['song_titles'].fillna(value='')
-artist_df['average_score'] = artist_df['average_score'].fillna(value=0.0)
 
-with open(current_directory + r'\spotify_api\database_jsons\artist_images_dataframes.json', "r") as openfile: 
-  artist_images_json = json.load(openfile)
 
 
 # defining weights for features
@@ -112,16 +132,13 @@ feature_dict = {
 }
 
 def lyric_vectorization (artist_df, query_artist):
-    tfidf_vectorizer = TfidfVectorizer(max_features=10000, stop_words='english', ngram_range=(1,2))
-    tfidf_matrix = tfidf_vectorizer.fit_transform(artist_df['concatenated_lyrics'])
-
-    # finding cosine similarity
-    cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+    
+    cosine_sim = cosine_similarity(tfidf_matrix_lyrics, tfidf_matrix_lyrics)
     cosine_sim_df = pd.DataFrame(cosine_sim, index=artist_df['artist'], columns=artist_df['artist'])
 
     # get similarity scores for Eminem
     similar_artists = cosine_sim_df[f'{query_artist}'].sort_values(ascending=False)
-    return (similar_artists[1:], tfidf_matrix)
+    return (similar_artists[1:], tfidf_matrix_lyrics)
 
 def song_name_vectorization (artist_df, query_artist):
     # FINDING ARTIST SIMILARITY USING ONLY SONG TITLES
@@ -244,20 +261,33 @@ def update_vector(relevant_artists=[], irrelevant_artists=[]):
     updated_similarities_df = pd.DataFrame(updated_similarities, columns=artist_df['artist'], index=['Similarity']).T
     updated_recommendations = updated_similarities_df.sort_values(by='Similarity', ascending=False)
 
-    fin_list = []
-    temp_count = 0
-    i = 0
-    while temp_count < 10:
-        a_name = updated_recommendations.index[i]
-        if a_name in irrelevant_artists or str(query_artist) in a_name:
+    print(updated_recommendations[1:10])
+
+    res = []
+    t_count = 0
+    temp_i = 0
+    while t_count < 10:
+        a_name = updated_recommendations.index[temp_i]
+        if (a_name in irrelevant_artists) or (str(query_artist) in a_name):
             pass
         else:
-            fin_list.append(a_name)
-            temp_count += 1
-        i += 1
-    # for i in updated_recommendations.index[1:11]:
-    #     fin_list.append(i)
-    return fin_list
+            #create graphs and add as strings
+
+            lyric_score = round((cosine_sim_lyrics_df[query_artist][a_name])*100, 2)
+            # try:
+            overall_score = round(updated_recommendations.loc[a_name]["Similarity"]*100, 2)
+            # except:
+            #     overall_score = 0
+            #add artist image
+            try:
+                res.append([a_name, artist_to_image[a_name], "", str(lyric_score), str(overall_score)])
+            except:
+                res.append([a_name, "", "", str(lyric_score), str(overall_score)])
+            # print("res:")
+            # print(res)
+            t_count += 1
+        temp_i += 1
+    return json.dumps(res)
 
 # Normalizes certain features in features_vec
 def normalize_feature_vec(features_vec):
@@ -286,10 +316,8 @@ def json_search(query):
     query_artist = query
     # print(artist_set)
     if query in artist_set:
-        _, tfidf_matrix = lyric_vectorization(artist_df, query)
-        _, tfidf_matrix_title = song_name_vectorization(artist_df, query)
-        _, tfidf_matrix_reviews = review_vectorization(artist_df, query)
-        cosine_sim_df_weighted = composite_vector(artist_df, tfidf_matrix, tfidf_matrix_title, tfidf_matrix_reviews)
+        # Specify the full path where you want to save the file
+        cosine_sim_df_weighted = composite_vector(artist_df, tfidf_matrix_lyrics, tfidf_matrix_title, tfidf_matrix_reviews)
         similar_artists_composite = cosine_sim_df_weighted[f'{str(query)}'].sort_values(ascending=False)
         # print(similar_artists_composite[1:])  # start from index 1 to skip artist himself       
         rankings = similar_artists_composite[1:]
@@ -319,19 +347,32 @@ def json_search(query):
         while t_count < 10:
             r = t_list[int(temp_i)]
             if query_artist not in str(r):
+                #create graphs and add as strings
+
+                fig = px.scatter(x=range(10), y=range(10))
+                graph_1 = plotly.io.to_html(fig, full_html=False, include_plotlyjs="cdn", default_width="300px", default_height="200px")
+
+                print("printing graph html below")
+                print(rankings[r])
+                print("graph html finished")
+                lyric_score = round((cosine_sim_lyrics_df[query_artist][r])*100, 2)
+
+                overall_score = round(rankings[r]*100, 2)
+                #add artist image
                 try:
-                    res.append([r, artist_to_image[r]])
+                    res.append([r, artist_to_image[r], graph_1, str(lyric_score), str(overall_score)])
                 except:
-                    res.append([r, ""])
+                    res.append([r, "", graph_1, str(lyric_score), str(overall_score)])
+
+                
                 
                 ranks.append(rankings[r])
-                print("res:")
-                print(res)
+                # print("res:")
+                # print(res)
                 t_count += 1
             else:
                 pass
             temp_i += 1
-            
         return json.dumps(res)
     else: 
         return json.dumps([])
@@ -355,37 +396,22 @@ def update_search():
     # print("printing html:")
     # print(temp)
     curr_json = html_to_json.convert(temp)
-    # print("printing json:")
+    
     # print(curr_json)
     temp_lst = []
-    df = curr_json['div']
-
     relevant_artists = []
     irrelevant_artists = []
-    for i in range(1, len(df)):
-        artist_frame = df[i]
-        artist_name = artist_frame['div'][0]['h3'][0]['_value'][13:]
-
-        if int(artist_frame['div'][0]['div'][0]['div'][0]['span'][1]['_value']) != 0:
-            relevant_artists.append(artist_name)
-        elif int(artist_frame['div'][0]['div'][0]['div'][1]['span'][1]['_value']) != 0:
-            irrelevant_artists.append(artist_name)
-
-    lst = update_vector(relevant_artists, irrelevant_artists)
-
-    for artist in lst:
-        try:
-            temp_lst.append([artist, artist_to_image[artist]])
-        except:
-            temp_lst.append([artist, ""])
-            
-    print("printing list:")
-    print(temp_lst)
-    new_json = json.dumps(temp_lst)
-    print("pring new_json:")
-    print(new_json)
-
-    return new_json
+    bs_ob = BeautifulSoup(temp, "html.parser")
+    for i in bs_ob.children:
+        data_temp= (i.get_text())
+        string = ''.join(list(map(lambda x: x.strip(), data_temp.split())))
+        a_name, _, rating = string.partition("thumb_up")
+        if a_name != "update":
+            if int(rating[0]) != 0:
+                relevant_artists.append(artist_name)
+            elif int(rating[-1]) != 0:
+                irrelevant_artists.append(artist_name)
+    return update_vector(relevant_artists, irrelevant_artists)
 
 
 
